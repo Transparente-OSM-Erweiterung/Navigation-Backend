@@ -20,18 +20,18 @@ public class AStarPathFinder<T extends Node> implements PathFinder<T> {
     @Override
     public List<T> findPath(T start, T destination) {
         // Warteschlange an Nodes für über die Iteriert werden soll, geordnet nach Priorität.
-        Queue<PathAwareNode<T>> openSet = new PriorityQueue<>();
+        Queue<PathAwareNode<T>> openList = new PriorityQueue<>();
         // Speicherung von PathAwareNodes die Kontextinformationen über den Pfad besitzen.
-        Map<String, PathAwareNode<T>> allNodes = new HashMap<>();
+        Map<String, PathAwareNode<T>> closedList = new HashMap<>();
 
         // Start Node laden.
         PathAwareNode<T> startRecord = new PathAwareNode<>(start, null, 0, heuristicScorer.computeCost(start, destination));
-        openSet.add(startRecord);
-        allNodes.put(start.getId(), startRecord);
+        openList.add(startRecord);
+        closedList.put(start.getId(), startRecord);
 
         // Solange Elemente in der Warteschlange sind.
-        while (!openSet.isEmpty()) {
-            PathAwareNode<T> current = openSet.poll();
+        while (!openList.isEmpty()) {
+            PathAwareNode<T> current = openList.poll();
 
             // Falls die Node mit der höchsten Priorität in der Warteschlange das Ziel ist.
             if (current.getId().equals(destination.getId())) {
@@ -41,7 +41,7 @@ public class AStarPathFinder<T extends Node> implements PathFinder<T> {
             // Für alle Nodes die über Edges mit der aktuellen Node verbunden sind.
             for (T neighbor : graph.getNeighbors(current.getCurrent())) {
                 // Node mit Kontextinformationen über den Pfad laden oder neue Node erstellen
-                PathAwareNode<T> neighbourRecord = allNodes.computeIfAbsent(neighbor.getId(), id -> new PathAwareNode<>(neighbor));
+                PathAwareNode<T> neighbourRecord = closedList.computeIfAbsent(neighbor.getId(), id -> new PathAwareNode<>(neighbor));
                 // Pfadlänge von Start zur Nachbar Node = Pfadlänge von Start zur jetzigen Node + Pfad länge von der jetzigen Node zur Nachbar Node.
                 double tentativeScore = current.getRouteScore() + nextNodeScorer.computeCost(current.getCurrent(), neighbor);
                 // Falls die berechnete Pfadlänge zum Nachbar kleiner als die bereits gespeicherte.
@@ -53,7 +53,7 @@ public class AStarPathFinder<T extends Node> implements PathFinder<T> {
                     // Gilt als Priorität für die Warteschlange
                     neighbourRecord.setEstimatedScore(tentativeScore + heuristicScorer.computeCost(neighbor, destination));
                     // Speicherung der Node mit Kontextinformationen.
-                    openSet.add(neighbourRecord);
+                    openList.add(neighbourRecord);
                 }
             }
         }
