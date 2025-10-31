@@ -1,4 +1,4 @@
-package de.dhbwka.navigation.plugin;
+package de.dhbwka.navigation.plugin.osm;
 
 import de.dhbwka.navigation.domain.GeoNode;
 
