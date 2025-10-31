@@ -45,6 +45,7 @@ public class NavigationServer {
     }
 
     private void handleNavigationRequest(HttpExchange exchange) throws IOException {
+        System.out.println("Handling Request");
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "http://localhost:4200");
         exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "GET, OPTIONS");
         exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
