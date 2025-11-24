@@ -45,34 +45,49 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
         return id.matches(".*[a-z].*");
     }
 
-    private List<T> sortDegree(Collection<? extends T> delegates, T node) {
+    public static <E extends GeoNode> List<E> sortDegree(Collection<? extends E> delegates, E origin
+    ) {
 
-        double vecX = node.getLatitude();
-        double vecY = node.getLongitude();
+        double originX = origin.getLatitude();
+        double originY = origin.getLongitude();
         double posNeighbourX = 0.;
         double posNeighbourY = 0.;
-        Map<T,Double> sortedList = new HashMap<>();
+        double vecX;
+        double vecY;
+        Map<E,Double> sortedList = new HashMap<>();
 
-        for (T neighbor : delegates) {
+        for (E neighbor : delegates) {
             posNeighbourX = neighbor.getLatitude();
             posNeighbourY = neighbor.getLongitude();
-            vecX = posNeighbourX - vecX;
-            vecY = posNeighbourY - vecY;
-            double max = Math.max(Math.abs(vecX),Math.abs(vecY));
-            vecX = vecX / max;
-            vecY = vecY / max;
-            double degree = Math.atan2(vecY,vecX);
+            vecX = posNeighbourX - originX;
+            vecY = posNeighbourY - originY;
+            double degree = Math.abs((Math.toDegrees(Math.atan2(-vecY,-vecX)) - 270) % 360);
             sortedList.put(neighbor,degree);
         }
 
         sortedList = sortedList.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .sorted(Map.Entry.comparingByValue(Comparator.naturalOrder()))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new
                 ));
 
         return sortedList.keySet().stream().toList();
+    }
+
+    public static double calcDeg(GeoNode origin, GeoNode dest) {
+        double originX = origin.getLatitude();
+        double originY = origin.getLongitude();
+        double posNeighbourX = 0.;
+        double posNeighbourY = 0.;
+        double vecX;
+        double vecY;
+
+        posNeighbourX = dest.getLatitude();
+        posNeighbourY = dest.getLongitude();
+        vecX = posNeighbourX - originX;
+        vecY = posNeighbourY - originY;
+        return Math.abs((Math.toDegrees(Math.atan2(-vecY,-vecX)) - 270) % 360);
     }
 
 }
