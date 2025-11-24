@@ -5,16 +5,18 @@ import java.util.*;
 public class AStarPathFinder<T extends Node> implements PathFinder<T> {
 
     private final Graph<T> graph;
-    private final Scorer<T> nextNodeScorer, heuristicScorer;
+    private final Scorer<? super T> nextNodeScorer, heuristicScorer;
 
-    public AStarPathFinder(Graph<T> graph, Scorer<T> nextNodeScorer, Scorer<T> heuristicScorer) {
-        this.graph = graph;
-        this.nextNodeScorer = nextNodeScorer;
-        this.heuristicScorer = heuristicScorer;
+    public AStarPathFinder(Graph<T> graph, Scorer<? super T> nextNodeScorer, Scorer<? super T> heuristicScorer) {
+        this.graph = Objects.requireNonNull(graph);
+        this.nextNodeScorer = Objects.requireNonNull(nextNodeScorer);
+        this.heuristicScorer = Objects.requireNonNull(heuristicScorer);
     }
 
     @Override
-    public List<T> findPath(T start, T destination) {
+    public List<? extends T> findPath(T start, T destination) {
+        Objects.requireNonNull(start);
+        Objects.requireNonNull(destination);
         // Warteschlange an Nodes für über die Iteriert werden soll, geordnet nach Priorität.
         Queue<PathAwareNode<T>> openList = new PriorityQueue<>();
         // Speicherung von PathAwareNodes die Kontextinformationen über den Pfad besitzen.

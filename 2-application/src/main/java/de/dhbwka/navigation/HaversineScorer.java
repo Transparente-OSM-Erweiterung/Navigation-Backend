@@ -1,6 +1,6 @@
 package de.dhbwka.navigation;
 
-public class HaversineScorer <T extends GeoNode> implements Scorer<T> {
+public class  HaversineScorer <T extends GeoNode> implements Scorer<T> {
 
     @Override
     public double computeCost(T from, T to) {

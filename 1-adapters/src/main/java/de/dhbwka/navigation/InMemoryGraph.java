@@ -9,22 +9,27 @@ public class InMemoryGraph<T extends Node> implements Graph<T>, GraphBuilder<T> 
 
     @Override
     public Optional<T> getNode(String id) {
+        Objects.requireNonNull(id);
         return Optional.ofNullable(nodes.get(id));
     }
 
     @Override
-    public Collection<T> getNeighbors(T node) {
+    public Collection<? extends T> getNeighbors(T node) {
+        Objects.requireNonNull(node);
         return adjacencyMap.getOrDefault(node.getId(), List.of());
     }
 
     @Override
     public void addNode(T node) {
+        Objects.requireNonNull(node);
         nodes.putIfAbsent(node.getId(), node);
         adjacencyMap.computeIfAbsent(node.getId(), k -> new ArrayList<>());
     }
 
     @Override
     public void addEdge(String fromId, String toId, boolean bidirectional) {
+        Objects.requireNonNull(fromId);
+        Objects.requireNonNull(toId);
         T fromNode = nodes.get(fromId);
         T toNode = nodes.get(toId);
         if (fromNode == null || toNode == null) {

@@ -63,7 +63,7 @@ public class NavigationServer {
         String start = parts[0];
         String end = parts[1];
 
-        List<OsmNode> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
+        List<? extends OsmNode> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
         String responseJson = String.format("""
                 %s
                 """, path.stream().map(n -> "[" + n.getLongitude() + ", " + n.getLatitude() + "]").toList());
