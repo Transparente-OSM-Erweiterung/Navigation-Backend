@@ -37,7 +37,7 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
             }
             return merged;
         }
-        return graph.getNeighbors(node);
+        return getNeighborsOfExtensionNode(node);
     }
 
     private Collection<T> getNeighborsOfExtensionNode(T node) {
