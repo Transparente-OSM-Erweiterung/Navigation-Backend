@@ -29,7 +29,7 @@ class ExtensionGraphTest {
         neighbors.forEach(n -> graph.addEdge(origin.getId(), n.getId()));
         GeoTestNode.Factory factory = new GeoTestNode.Factory();
         ExtensionGraph<GeoNode> extGraph = new ExtensionGraph<>(graph, factory::createNode);
-        Collection<? extends GeoNode> extNeighbours = extGraph.getNeighbors(origin);
+        Collection<GeoNode> extNeighbours = extGraph.getNeighbors(origin);
         assertEquals(8, extNeighbours.size());
         assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0a")));
         assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0b")));
@@ -80,5 +80,31 @@ class ExtensionGraphTest {
         assertEquals(225, ExtensionGraph.calcDeg(origin, new GeoTestNode("6", -2, -2)));
         assertEquals(270, ExtensionGraph.calcDeg(origin, new GeoTestNode("7", -2, 0)));
         assertEquals(315, ExtensionGraph.calcDeg(origin, new GeoTestNode("8", -2, 2)));
+    }
+
+    @Test
+    void getNeighborsOfExtNode() {
+        GeoNode origin = new GeoTestNode("0a", 0, 0);
+        GeoNode main = new GeoTestNode("0", 0, 0);
+        List<GeoNode> neighboursOfMain = List.of(
+                new GeoTestNode("1", 0, 1),
+                new GeoTestNode("2", 1, 0),
+                new GeoTestNode("3", 0, -1),
+                new GeoTestNode("4", -1, 0)
+        );
+        InMemoryGraph<GeoNode> graph = new InMemoryGraph<>();
+        graph.addNode(main);
+        neighboursOfMain.forEach(graph::addNode);
+        neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId()));
+        GeoTestNode.Factory factory = new GeoTestNode.Factory();
+        ExtensionGraph<GeoNode> extGraph = new ExtensionGraph<>(graph, factory::createNode);
+        Collection<GeoNode> extNeighbours = extGraph.getNeighbors(origin);
+
+        assertEquals(5, extNeighbours.size());
+        assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0")));
+        assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0b")));
+        assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0d")));
+        assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("1a")));
+        assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("2a")));
     }
 }

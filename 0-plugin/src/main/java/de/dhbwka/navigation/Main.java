@@ -18,7 +18,7 @@ public class Main {
         OsmXmlParser parser = new OsmXmlParser(graph);
         parser.parse(new FileInputStream("./run/map.osm"));
         PathFinder<OsmNode> pathFinder = new AStarPathFinder<>(new ExtensionGraph<>(graph, new OSMNodeFactory()), new HaversineScorer<>(), new HaversineScorer<>());
-        List<? extends OsmNode> path = pathFinder.findPath(graph.getNode("21533398").orElseThrow(), graph.getNode("15105688").orElseThrow());
+        List<OsmNode> path = pathFinder.findPath(graph.getNode("21533398").orElseThrow(), graph.getNode("15105688").orElseThrow());
         System.out.println(path.stream().map(OsmNode::getId).toList());
         System.out.println(path.stream().map(node -> String.format(Locale.US, "[%.5f,%.5f]", node.getLongitude(), node.getLatitude())).toList());
         NavigationServer server = new NavigationServer();

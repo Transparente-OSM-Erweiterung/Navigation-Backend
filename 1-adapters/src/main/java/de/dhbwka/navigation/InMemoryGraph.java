@@ -14,7 +14,7 @@ public class InMemoryGraph<T extends Node> implements Graph<T>, GraphBuilder<T> 
     }
 
     @Override
-    public Collection<? extends T> getNeighbors(T node) {
+    public Collection<T> getNeighbors(T node) {
         Objects.requireNonNull(node);
         return adjacencyMap.getOrDefault(node.getId(), List.of());
     }

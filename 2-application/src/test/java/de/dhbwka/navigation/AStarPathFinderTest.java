@@ -30,7 +30,7 @@ class AStarPathFinderTest {
 
     @Test
     void findPath() {
-        List<? extends Vector2Node> path = pathFinder.findPath(graph.getNode("A").orElseThrow(), graph.getNode("D").orElseThrow());
+        List<Vector2Node> path = pathFinder.findPath(graph.getNode("A").orElseThrow(), graph.getNode("D").orElseThrow());
         String[] pathString = path.stream().map(Vector2Node::getId).toArray(String[]::new);
         assertArrayEquals(new String[]{"A", "B", "D"}, pathString);
     }

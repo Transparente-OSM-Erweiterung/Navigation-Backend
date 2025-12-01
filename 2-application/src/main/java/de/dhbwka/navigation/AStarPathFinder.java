@@ -14,7 +14,7 @@ public class AStarPathFinder<T extends Node> implements PathFinder<T> {
     }
 
     @Override
-    public List<? extends T> findPath(T start, T destination) {
+    public List<T> findPath(T start, T destination) {
         Objects.requireNonNull(start);
         Objects.requireNonNull(destination);
         // Warteschlange an Nodes für über die Iteriert werden soll, geordnet nach Priorität.
