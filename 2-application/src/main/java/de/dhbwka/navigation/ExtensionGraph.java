@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
     private final Graph<T> graph;
 
+    private final double STREET_WIDTH = 2;
+
     private final ExtensionNodeFactory<T> factory;
 
     public ExtensionGraph(Graph<T> graph, ExtensionNodeFactory<T> factory) {
@@ -18,22 +20,41 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
         if (!isExtensionId(id)) {
             return graph.getNode(id);
         }
+        //TODO
         return Optional.empty();
     }
 
     @Override
     public Collection<T> getNeighbors(T node) {
         if (!isExtensionId(node.getId())) {
-            Collection<T> delegated = sortDegree(graph.getNeighbors(node), node);
+            List<T> delegated = sortDegree(graph.getNeighbors(node), node);
+            Vec2 origin = new Vec2(node.getLatitude(), node.getLongitude());
+            List<GeoNode> merged = new ArrayList<>();
 
-            List<T> merged = new ArrayList<>();
-            int i = 0;
-            for (T neighbor : delegated) {
-                merged.add(neighbor);
+            for (int i = 0; i < delegated.size(); i++) {
+                merged.add(delegated.get(i));
                 String id = node.getId();
                 char append = (char) (97 + i);
-                merged.add(factory.createNode(id + append));
-                i++;
+
+                Vec2 vecNb1 = new Vec2(
+                    delegated.get(i).getLatitude() - node.getLatitude(),
+                    delegated.get(i).getLongitude() - node.getLongitude()
+                ).normalized();
+                Vec2 vecNb2 = new Vec2(
+                        delegated.get((i + 1) % delegated.size()).getLatitude() - node.getLatitude(),
+                        delegated.get((i + 1) % delegated.size()).getLongitude() - node.getLongitude()
+                ).normalized();
+
+                Vec2 normal1 = vecNb1.rot90right();
+                Vec2 normal2 = vecNb2.rot90left();
+
+                Vec2 point1 = origin.add(normal1.scale(STREET_WIDTH / 2));
+                Vec2 point2 = origin.add(normal2.scale(STREET_WIDTH / 2));
+
+                Taschenrechner.solveTaste();
+
+                merged.add(new ExtensionNode(id+append, 0, 0));
+
             }
             return merged;
         }
