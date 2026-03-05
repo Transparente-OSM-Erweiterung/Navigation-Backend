@@ -84,7 +84,7 @@ class ExtensionGraphTest {
 
     @Test
     void getNeighborsOfExtNode() {
-        GeoNode origin = new GeoTestNode("0a", 0, 0);
+        GeoNode origin = new GeoTestNode("0a", 1, 1);
         GeoNode main = new GeoTestNode("0", 0, 0);
         List<GeoNode> neighboursOfMain = List.of(
                 new GeoTestNode("1", 0, 1),
