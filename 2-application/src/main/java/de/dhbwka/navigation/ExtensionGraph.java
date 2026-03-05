@@ -36,24 +36,38 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
                 String id = node.getId();
                 char append = (char) (97 + i);
 
-                Vec2 vecNb1 = new Vec2(
+                Vec2 u1 = new Vec2(
                     delegated.get(i).getLatitude() - node.getLatitude(),
                     delegated.get(i).getLongitude() - node.getLongitude()
                 ).normalized();
-                Vec2 vecNb2 = new Vec2(
+                Vec2 u2 = new Vec2(
                         delegated.get((i + 1) % delegated.size()).getLatitude() - node.getLatitude(),
                         delegated.get((i + 1) % delegated.size()).getLongitude() - node.getLongitude()
                 ).normalized();
 
-                Vec2 normal1 = vecNb1.rot90right();
-                Vec2 normal2 = vecNb2.rot90left();
+                Vec2 normal1 = u1.rot90right();
+                Vec2 normal2 = u2.rot90left();
 
-                Vec2 point1 = origin.add(normal1.scale(STREET_WIDTH / 2));
-                Vec2 point2 = origin.add(normal2.scale(STREET_WIDTH / 2));
+                Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH / 2));
+                Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH / 2));
 
-                Taschenrechner.solveTaste();
+                // g: point1 + u1 * s
+                // f: point2 + u2 * t
 
-                merged.add(new ExtensionNode(id+append, 0, 0));
+                //(u1.x, -u2.x) * (s) = (p2.x - p1.x)
+                //(u1.y, -u2.y)   (t)   (p2.y - p1.y)
+
+                Mat2 mat = new Mat2(
+                        u1.x, -u2.x,
+                        u1.y, -u2.y
+                );
+                Vec2 rhs = p2.add(p1.negated());
+
+                double s = Cramer2Solve.solveX(mat, rhs);
+
+                Vec2 intersection = p1.add(u1.scale(s));
+
+                merged.add(new ExtensionNode(id+append, intersection.x, intersection.y));
 
             }
             return merged;
