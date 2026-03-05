@@ -2,10 +2,7 @@ package de.dhbwka.navigation.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import de.dhbwka.navigation.InMemoryGraph;
-import de.dhbwka.navigation.AStarPathFinder;
-import de.dhbwka.navigation.HaversineScorer;
-import de.dhbwka.navigation.PathFinder;
+import de.dhbwka.navigation.*;
 import de.dhbwka.navigation.osm.OsmNode;
 import de.dhbwka.navigation.osm.OsmXmlParser;
 
@@ -24,8 +21,8 @@ import java.util.Map;
 
 public class NavigationServer {
 
-    InMemoryGraph<OsmNode> graph;
-    PathFinder<OsmNode> pathFinder;
+    InMemoryGraph<GeoNode> graph;
+    PathFinder<GeoNode> pathFinder;
 
     public NavigationServer() throws FileNotFoundException, XMLStreamException {
         graph = new InMemoryGraph<>();
@@ -63,7 +60,7 @@ public class NavigationServer {
         String start = parts[0];
         String end = parts[1];
 
-        List<OsmNode> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
+        List<GeoNode> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
         String responseJson = String.format("""
                 %s
                 """, path.stream().map(n -> "[" + n.getLongitude() + ", " + n.getLatitude() + "]").toList());

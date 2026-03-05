@@ -25,4 +25,9 @@ public class ExtensionNode implements GeoNode{
     public String getId() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "[id= "+id + ", lat=" + latitude + ", lon=" + longitude +"]";
+    }
 }

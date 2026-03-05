@@ -1,5 +1,6 @@
 package de.dhbwka.navigation.osm;
 
+import de.dhbwka.navigation.GeoNode;
 import de.dhbwka.navigation.GraphBuilder;
 
 import javax.xml.stream.XMLInputFactory;
@@ -13,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 public class OsmXmlParser {
-    private final GraphBuilder<OsmNode> graphBuilder;
+    private final GraphBuilder<GeoNode> graphBuilder;
 
-    public OsmXmlParser(GraphBuilder<OsmNode> graphBuilder) {
+    public OsmXmlParser(GraphBuilder<GeoNode> graphBuilder) {
         this.graphBuilder = graphBuilder;
     }
 

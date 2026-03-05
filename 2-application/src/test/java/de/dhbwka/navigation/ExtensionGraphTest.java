@@ -28,7 +28,7 @@ class ExtensionGraphTest {
         neighbors.forEach(graph::addNode);
         neighbors.forEach(n -> graph.addEdge(origin.getId(), n.getId()));
         GeoTestNode.Factory factory = new GeoTestNode.Factory();
-        ExtensionGraph<GeoNode> extGraph = new ExtensionGraph<>(graph, factory::createNode);
+        ExtensionGraph extGraph = new ExtensionGraph(graph);
         Collection<GeoNode> extNeighbours = extGraph.getNeighbors(origin);
         assertEquals(8, extNeighbours.size());
         assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0a")));
@@ -97,10 +97,11 @@ class ExtensionGraphTest {
         neighboursOfMain.forEach(graph::addNode);
         neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId()));
         GeoTestNode.Factory factory = new GeoTestNode.Factory();
-        ExtensionGraph<GeoNode> extGraph = new ExtensionGraph<>(graph, factory::createNode);
+        ExtensionGraph extGraph = new ExtensionGraph(graph);
         Collection<GeoNode> extNeighbours = extGraph.getNeighbors(origin);
 
         assertEquals(5, extNeighbours.size());
+        extNeighbours.forEach(System.out::println);
         assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0")));
         assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0b")));
         assertTrue(extNeighbours.stream().map(GeoNode::getId).anyMatch(id -> id.equals("0d")));

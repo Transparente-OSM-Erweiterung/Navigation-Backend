@@ -3,20 +3,18 @@ package de.dhbwka.navigation;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
-    private final Graph<T> graph;
+public class ExtensionGraph implements Graph<GeoNode> {
+    private final Graph<GeoNode> graph;
 
     private final double STREET_WIDTH = 2;
 
-    private final ExtensionNodeFactory<T> factory;
 
-    public ExtensionGraph(Graph<T> graph, ExtensionNodeFactory<T> factory) {
+    public ExtensionGraph(Graph<GeoNode> graph) {
         this.graph = graph;
-        this.factory = factory;
     }
 
     @Override
-    public Optional<T> getNode(String id) {
+    public Optional<GeoNode> getNode(String id) {
         if (!isExtensionId(id)) {
             return graph.getNode(id);
         }
@@ -25,9 +23,9 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
     }
 
     @Override
-    public Collection<T> getNeighbors(T node) {
+    public Collection<GeoNode> getNeighbors(GeoNode node) {
         if (!isExtensionId(node.getId())) {
-            List<T> delegated = sortDegree(graph.getNeighbors(node), node);
+            List<GeoNode> delegated = sortDegree(graph.getNeighbors(node), node);
             Vec2 origin = new Vec2(node.getLatitude(), node.getLongitude());
             List<GeoNode> merged = new ArrayList<>();
 
@@ -63,9 +61,13 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
                 );
                 Vec2 rhs = p2.add(p1.negated());
 
-                double s = Cramer2Solve.solveX(mat, rhs);
-
-                Vec2 intersection = p1.add(u1.scale(s));
+                Vec2 intersection;
+                try {
+                    double s = Cramer2Solve.solveX(mat, rhs);
+                    intersection = p1.add(u1.scale(s));
+                } catch (IllegalArgumentException e) {
+                    intersection = p1.add(p2).scale(0.5);
+                }
 
                 merged.add(new ExtensionNode(id+append, intersection.x, intersection.y));
 
@@ -74,17 +76,16 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
         }
         return getNeighborsOfExtensionNode(node);
     }
-
-    private Collection<T> getNeighborsOfExtensionNode(T node) {
-        List<T> result = new ArrayList<>();
-        T mainNode = graph.getNode(node.getId().replaceAll("[^0-9]", "")).orElseThrow();
+    private Collection<GeoNode> getNeighborsOfExtensionNode(GeoNode node) {
+        List<GeoNode> result = new ArrayList<>();
+        GeoNode mainNode = graph.getNode(node.getId().replaceAll("[^0-9]", "")).orElseThrow();
         result.add(mainNode);
-        List<T> neighboursMainNode = List.copyOf(getNeighbors(mainNode));
+        List<GeoNode> neighboursMainNode = List.copyOf(getNeighbors(mainNode));
 
         for (int i = 0; i < neighboursMainNode.size(); i++) {
             if (neighboursMainNode.get(i).getId().equals(node.getId())) {
-                T extNeighbourLeft = neighboursMainNode.get((i - 2 + neighboursMainNode.size()) % neighboursMainNode.size());
-                T extNeighbourRight = neighboursMainNode.get((i + 2) % neighboursMainNode.size());
+                GeoNode extNeighbourLeft = neighboursMainNode.get((i - 2 + neighboursMainNode.size()) % neighboursMainNode.size());
+                GeoNode extNeighbourRight = neighboursMainNode.get((i + 2) % neighboursMainNode.size());
                 result.add(extNeighbourLeft);
                 if (!extNeighbourLeft.getId().equals(extNeighbourRight.getId())) {
                     result.add(extNeighbourRight);
@@ -96,16 +97,16 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
         for (int i = 0; i < neighboursMainNode.size(); i++) {
             double angleOfNeighbour = calcDeg(mainNode, neighboursMainNode.get(i));
             if (angleOfNeighbour >= angleOfExtension) {
-                T prev = neighboursMainNode.get((i+neighboursMainNode.size()-1)%neighboursMainNode.size());
-                T next = neighboursMainNode.get((i+1)%neighboursMainNode.size());
-                List<T> prevNeighbours = new ArrayList<>(getNeighbors(prev));
-                List<T> nextNeighbours = new ArrayList<>(getNeighbors(next));
+                GeoNode prev = neighboursMainNode.get((i+neighboursMainNode.size()-1)%neighboursMainNode.size());
+                GeoNode next = neighboursMainNode.get((i+1)%neighboursMainNode.size());
+                List<GeoNode> prevNeighbours = new ArrayList<>(getNeighbors(prev));
+                List<GeoNode> nextNeighbours = new ArrayList<>(getNeighbors(next));
 
 
                 
                 for (int iprev = 0; iprev < prevNeighbours.size(); iprev++) {
                     if (prevNeighbours.get(iprev).getId().equals(mainNode.getId())) {
-                        T extNeighbourLeft = prevNeighbours.get((iprev - 1 + prevNeighbours.size()) % neighboursMainNode.size());
+                        GeoNode extNeighbourLeft = prevNeighbours.get((iprev - 1 + prevNeighbours.size()) % prevNeighbours.size());
                         result.add(extNeighbourLeft);
 
                         break;
@@ -114,7 +115,7 @@ public class ExtensionGraph<T extends GeoNode> implements Graph<T> {
 
                 for (int inext = 0; inext < nextNeighbours.size(); inext++) {
                     if (nextNeighbours.get(inext).getId().equals(mainNode.getId())) {
-                        T extNeighbourRight = nextNeighbours.get((inext + 1) % nextNeighbours.size());
+                        GeoNode extNeighbourRight = nextNeighbours.get((inext + 1) % nextNeighbours.size());
                         result.add(extNeighbourRight);
 
                         break;
