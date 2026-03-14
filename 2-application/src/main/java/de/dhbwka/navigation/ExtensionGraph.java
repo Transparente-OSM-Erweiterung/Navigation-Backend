@@ -1,180 +1,152 @@
 package de.dhbwka.navigation;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class ExtensionGraph implements Graph<GeoNode> {
+public class ExtensionGraph implements Graph<GeoNode>{
     private final Graph<GeoNode> graph;
 
-    private final double STREET_WIDTH = 2;
+    private final double STREET_WIDTH = 0.00002;
 
 
     public ExtensionGraph(Graph<GeoNode> graph) {
         this.graph = graph;
     }
 
+
     @Override
     public Optional<GeoNode> getNode(String id) {
-        if (!isExtensionId(id)) {
-            return graph.getNode(id);
-        }
-        //TODO
-        return Optional.empty();
+        return graph.getNode(id);
     }
 
     @Override
     public Collection<GeoNode> getNeighbors(GeoNode node) {
-        if (!isExtensionId(node.getId())) {
-            List<GeoNode> delegated = sortDegree(graph.getNeighbors(node), node);
-            Vec2 origin = new Vec2(node.getLatitude(), node.getLongitude());
-            List<GeoNode> merged = new ArrayList<>();
-
-            for (int i = 0; i < delegated.size(); i++) {
-                merged.add(delegated.get(i));
-                String id = node.getId();
-                char append = (char) (97 + i);
-
-                Vec2 u1 = new Vec2(
-                    delegated.get(i).getLatitude() - node.getLatitude(),
-                    delegated.get(i).getLongitude() - node.getLongitude()
-                ).normalized();
-                Vec2 u2 = new Vec2(
-                        delegated.get((i + 1) % delegated.size()).getLatitude() - node.getLatitude(),
-                        delegated.get((i + 1) % delegated.size()).getLongitude() - node.getLongitude()
-                ).normalized();
-
-                Vec2 normal1 = u1.rot90right();
-                Vec2 normal2 = u2.rot90left();
-
-                Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH / 2));
-                Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH / 2));
-
-                // g: point1 + u1 * s
-                // f: point2 + u2 * t
-
-                //(u1.x, -u2.x) * (s) = (p2.x - p1.x)
-                //(u1.y, -u2.y)   (t)   (p2.y - p1.y)
-
-                Mat2 mat = new Mat2(
-                        u1.x, -u2.x,
-                        u1.y, -u2.y
-                );
-                Vec2 rhs = p2.add(p1.negated());
-
-                Vec2 intersection;
-                try {
-                    double s = Cramer2Solve.solveX(mat, rhs);
-                    intersection = p1.add(u1.scale(s));
-                } catch (IllegalArgumentException e) {
-                    intersection = p1.add(p2).scale(0.5);
-                }
-
-                merged.add(new ExtensionNode(id+append, intersection.x, intersection.y));
-
-            }
-            return merged;
-        }
-        return getNeighborsOfExtensionNode(node);
+        Compound<GeoNode> nb =
+                isExtensionId(node.getId())
+                ?getNeighborsOfExtensionNode(node)
+                :getNeighborsOfBaseNode(node);
+        List<GeoNode> ret = new ArrayList<>(nb.baseNodes);
+        ret.addAll(nb.extenesionNodes);
+        return ret;
     }
-    private Collection<GeoNode> getNeighborsOfExtensionNode(GeoNode node) {
-        List<GeoNode> result = new ArrayList<>();
-        GeoNode mainNode = graph.getNode(node.getId().replaceAll("[^0-9]", "")).orElseThrow();
-        result.add(mainNode);
-        List<GeoNode> neighboursMainNode = List.copyOf(getNeighbors(mainNode));
 
-        for (int i = 0; i < neighboursMainNode.size(); i++) {
-            if (neighboursMainNode.get(i).getId().equals(node.getId())) {
-                GeoNode extNeighbourLeft = neighboursMainNode.get((i - 2 + neighboursMainNode.size()) % neighboursMainNode.size());
-                GeoNode extNeighbourRight = neighboursMainNode.get((i + 2) % neighboursMainNode.size());
-                result.add(extNeighbourLeft);
-                if (!extNeighbourLeft.getId().equals(extNeighbourRight.getId())) {
-                    result.add(extNeighbourRight);
+    private Compound<GeoNode> getNeighborsOfBaseNode(GeoNode node) {
+        if(isExtensionId(node.getId())) throw new IllegalArgumentException();
+        Compound<GeoNode> compound = new Compound<>(new ArrayList<>(), new ArrayList<>());
+        compound.baseNodes.addAll(graph.getNeighbors(node));
+        compound.baseNodes.sort(new DegreeComparator<>(node));
+
+        Vec2 origin = new Vec2(node.getLatitude(), node.getLongitude());
+
+        for (int i = 0; i < compound.baseNodes.size(); i++) {
+            Vec2 u1 = new Vec2(
+                    compound.baseNodes.get(i).getLatitude(),
+                    compound.baseNodes.get(i).getLongitude())
+                    .add(origin.scale(-1))
+                    .normalized();
+            Vec2 u2 = new Vec2(
+                    compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getLatitude(),
+                    compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getLongitude())
+                    .add(origin.scale(-1))
+                    .normalized();
+
+            Vec2 normal1 = u1.rot90right();
+            Vec2 normal2 = u2.rot90left();
+
+            Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH / 2));
+            Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH / 2));
+
+            // g: point1 + u1 * s
+            // f: point2 + u2 * t
+
+            //(u1.x, -u2.x) * (s) = (p2.x - p1.x)
+            //(u1.y, -u2.y)   (t)   (p2.y - p1.y)
+
+            Mat2 mat = new Mat2(
+                    u1.x, -u2.x,
+                    u1.y, -u2.y
+            );
+            Vec2 rhs = p2.add(p1.negated());
+
+            Vec2 intersection;
+            try {
+                double s = Cramer2Solve.solveX(mat, rhs);
+                intersection = p1.add(u1.scale(s));
+            } catch (IllegalArgumentException e) {
+                intersection = p1.add(p2).scale(0.5);
+            }
+            compound.extenesionNodes.add(new ExtensionNode(node.getId() + (char)('a' + i), intersection.x, intersection.y));
+        }
+        compound.extenesionNodes.sort(new DegreeComparator<>(node));
+        return compound;
+    }
+
+    private Compound<GeoNode> getNeighborsOfExtensionNode(GeoNode node) {
+        if(!isExtensionId(node.getId())) throw new IllegalArgumentException();
+        Compound<GeoNode> compound = new Compound<>(new ArrayList<>(), new ArrayList<>());
+        GeoNode parent = graph.getNode(node.getId().replaceAll("[^0-9]", "")).orElseThrow();
+        int offset = node.getId().charAt(node.getId().length() - 1) - 'a';
+        compound.baseNodes.add(parent);
+
+        Compound<GeoNode> parentNeighbors = getNeighborsOfBaseNode(parent);
+
+        if(parentNeighbors.extenesionNodes.size() > 1) {
+        for (int i = 0; i < parentNeighbors.extenesionNodes.size(); i++) {
+            if(parentNeighbors.extenesionNodes.get(i).getId().equals(node.getId())){
+                GeoNode left = parentNeighbors.extenesionNodes.get((i - 1 + parentNeighbors.extenesionNodes.size()) % parentNeighbors.extenesionNodes.size());
+                GeoNode right = parentNeighbors.extenesionNodes.get((i + 1) % parentNeighbors.extenesionNodes.size());
+                compound.extenesionNodes.add(left);
+                if (left != right) {
+                    compound.extenesionNodes.add(parentNeighbors.extenesionNodes.get((i + 1) % parentNeighbors.extenesionNodes.size()));
                 }
                 break;
             }
         }
-        double angleOfExtension = calcDeg(mainNode, node);
-        for (int i = 0; i < neighboursMainNode.size(); i++) {
-            double angleOfNeighbour = calcDeg(mainNode, neighboursMainNode.get(i));
-            if (angleOfNeighbour >= angleOfExtension) {
-                GeoNode prev = neighboursMainNode.get((i+neighboursMainNode.size()-1)%neighboursMainNode.size());
-                GeoNode next = neighboursMainNode.get((i+1)%neighboursMainNode.size());
-                List<GeoNode> prevNeighbours = new ArrayList<>(getNeighbors(prev));
-                List<GeoNode> nextNeighbours = new ArrayList<>(getNeighbors(next));
+        }
 
+        List<GeoNode>  matchingBaseNeighboursOfParent = List.of(
+                parentNeighbors.baseNodes.get(offset),
+                parentNeighbors.baseNodes.get((offset + 1) % parentNeighbors.baseNodes.size()) // TODO
+        ); // Double entries are intended as single base edged ExtensionNeighbours also have 2 ExtensionNeighbors, in this case twice from the same base node.
 
-                
-                for (int iprev = 0; iprev < prevNeighbours.size(); iprev++) {
-                    if (prevNeighbours.get(iprev).getId().equals(mainNode.getId())) {
-                        GeoNode extNeighbourLeft = prevNeighbours.get((iprev - 1 + prevNeighbours.size()) % prevNeighbours.size());
-                        result.add(extNeighbourLeft);
+        // Special Case of 2 Nodes Connected to just each other but nowhere else where Correct would be only 1 extension neighbor but calculated are being 2 times the same neighbor gets ignored here.
 
-                        break;
-                    }
+        for (int i = 0; i < matchingBaseNeighboursOfParent.size(); i++) {
+            GeoNode matchingBaseNeighbourOfParent = matchingBaseNeighboursOfParent.get(i);
+            Compound<GeoNode> neighboursAroundMatchingBaseNeighbourOfParent = getNeighborsOfBaseNode(matchingBaseNeighbourOfParent);
+            for (int j = 0; j < neighboursAroundMatchingBaseNeighbourOfParent.baseNodes.size(); j++) {
+                if (neighboursAroundMatchingBaseNeighbourOfParent.baseNodes.get(j).getId().equals(parent.getId())) {
+                    compound.extenesionNodes.add(
+                            neighboursAroundMatchingBaseNeighbourOfParent.extenesionNodes.get(
+                                    (j -  i /* (-1 * i + 1)*/  /* TODO */ + neighboursAroundMatchingBaseNeighbourOfParent.extenesionNodes.size())
+                                            % neighboursAroundMatchingBaseNeighbourOfParent.extenesionNodes.size()
+                            ));
                 }
-
-                for (int inext = 0; inext < nextNeighbours.size(); inext++) {
-                    if (nextNeighbours.get(inext).getId().equals(mainNode.getId())) {
-                        GeoNode extNeighbourRight = nextNeighbours.get((inext + 1) % nextNeighbours.size());
-                        result.add(extNeighbourRight);
-
-                        break;
-                    }
-                }
-
-                break;
             }
         }
-        return result;
+
+        return compound;
     }
 
     private static boolean isExtensionId(String id) {
-        return id.matches(".*[a-z].*");
+        return id.matches("[0-9]*[a-z]");
     }
 
-    public static <E extends GeoNode> List<E> sortDegree(Collection<E> delegates, E origin
-    ) {
+    public static<E extends GeoNode> double calcDeg(E origin, E dest) {
+        Vec2 originVec = new Vec2(origin.getLatitude(),origin.getLongitude());
+        Vec2 destVec = new Vec2(dest.getLatitude(), dest.getLongitude());
 
-        double originX = origin.getLatitude();
-        double originY = origin.getLongitude();
-        double posNeighbourX = 0.;
-        double posNeighbourY = 0.;
-        double vecX;
-        double vecY;
-        Map<E, Double> sortedList = new HashMap<>();
+        Vec2 delta = destVec.add(originVec.scale(-1));
 
-        for (E neighbor : delegates) {
-            posNeighbourX = neighbor.getLatitude();
-            posNeighbourY = neighbor.getLongitude();
-            vecX = posNeighbourX - originX;
-            vecY = posNeighbourY - originY;
-            double degree = Math.abs((Math.toDegrees(Math.atan2(-vecY, -vecX)) - 270) % 360);
-            sortedList.put(neighbor, degree);
+        return Math.abs((Math.toDegrees(Math.atan2(-delta.y, -delta.x)) - 270) % 360);
+    }
+
+    private record Compound<E extends GeoNode> (List<E> baseNodes, List<E> extenesionNodes){}
+
+    private record DegreeComparator<E extends GeoNode>(E origin) implements Comparator<E> {
+        @Override
+        public int compare(E e1, E e2) {
+            return Comparator.comparingDouble((E n) -> calcDeg(origin, n))
+                    .compare(e1, e2);
         }
-
-        sortedList = sortedList.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.naturalOrder()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey, Map.Entry::getValue,
-                        (oldValue, newValue) -> oldValue, LinkedHashMap::new
-                ));
-
-        return sortedList.keySet().stream().toList();
     }
-
-    public static double calcDeg(GeoNode origin, GeoNode dest) {
-        double originX = origin.getLatitude();
-        double originY = origin.getLongitude();
-        double posNeighbourX = 0.;
-        double posNeighbourY = 0.;
-        double vecX;
-        double vecY;
-
-        posNeighbourX = dest.getLatitude();
-        posNeighbourY = dest.getLongitude();
-        vecX = posNeighbourX - originX;
-        vecY = posNeighbourY - originY;
-        return Math.abs((Math.toDegrees(Math.atan2(-vecY, -vecX)) - 270) % 360);
-    }
-
 }

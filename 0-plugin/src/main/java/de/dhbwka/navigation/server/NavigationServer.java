@@ -3,7 +3,6 @@ package de.dhbwka.navigation.server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import de.dhbwka.navigation.*;
-import de.dhbwka.navigation.osm.OsmNode;
 import de.dhbwka.navigation.osm.OsmXmlParser;
 
 import javax.xml.stream.XMLStreamException;
@@ -28,7 +27,7 @@ public class NavigationServer {
         graph = new InMemoryGraph<>();
         OsmXmlParser parser = new OsmXmlParser(graph);
         parser.parse(new FileInputStream("./run/map.osm"));
-        pathFinder = new AStarPathFinder<>(graph, new HaversineScorer<>(), new HaversineScorer<>());
+        pathFinder = new AStarPathFinder<>(new ExtensionGraph(graph), new HaversineScorer<>(), new HaversineScorer<>());
     }
 
     public void start() throws IOException {

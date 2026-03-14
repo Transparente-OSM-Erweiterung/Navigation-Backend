@@ -40,7 +40,7 @@ public class Vec2 {
 
     public Vec2 normalized() {
         double f = Math.sqrt(this.x * this.x + this.y * this.y);
-        return f < 1.0E-4F ? ZERO : new Vec2(this.x / f, this.y / f);
+        return new Vec2(this.x / f, this.y / f);
     }
 
     public double length() {

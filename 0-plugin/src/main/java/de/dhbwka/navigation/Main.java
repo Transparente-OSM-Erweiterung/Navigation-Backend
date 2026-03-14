@@ -1,7 +1,5 @@
 package de.dhbwka.navigation;
 
-import de.dhbwka.navigation.osm.OSMNodeFactory;
-import de.dhbwka.navigation.osm.OsmNode;
 import de.dhbwka.navigation.osm.OsmXmlParser;
 import de.dhbwka.navigation.server.NavigationServer;
 
