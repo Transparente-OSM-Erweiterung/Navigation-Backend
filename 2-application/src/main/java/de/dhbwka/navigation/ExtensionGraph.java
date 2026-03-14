@@ -33,7 +33,7 @@ public class ExtensionGraph implements Graph<GeoNode>{
         if(isExtensionId(node.getId())) throw new IllegalArgumentException();
         Compound<GeoNode> compound = new Compound<>(new ArrayList<>(), new ArrayList<>());
         compound.baseNodes.addAll(graph.getNeighbors(node));
-        compound.baseNodes.sort(new DegreeComparator<>(node));
+        compound.baseNodes.sort(new DegreeComparator<>(node, 0));
 
         Vec2 origin = new Vec2(node.getLatitude(), node.getLongitude());
 
@@ -76,7 +76,7 @@ public class ExtensionGraph implements Graph<GeoNode>{
             }
             compound.extenesionNodes.add(new ExtensionNode(node.getId() + (char)('a' + i), intersection.x, intersection.y));
         }
-        compound.extenesionNodes.sort(new DegreeComparator<>(node));
+        compound.extenesionNodes.sort(new DegreeComparator<>(node, calcDeg(node, compound.baseNodes.getFirst())));
         return compound;
     }
 
@@ -105,7 +105,7 @@ public class ExtensionGraph implements Graph<GeoNode>{
 
         List<GeoNode>  matchingBaseNeighboursOfParent = List.of(
                 parentNeighbors.baseNodes.get(offset),
-                parentNeighbors.baseNodes.get((offset + 1) % parentNeighbors.baseNodes.size()) // TODO
+                parentNeighbors.baseNodes.get((offset + 1) % parentNeighbors.baseNodes.size())
         ); // Double entries are intended as single base edged ExtensionNeighbours also have 2 ExtensionNeighbors, in this case twice from the same base node.
 
         // Special Case of 2 Nodes Connected to just each other but nowhere else where Correct would be only 1 extension neighbor but calculated are being 2 times the same neighbor gets ignored here.
@@ -117,7 +117,7 @@ public class ExtensionGraph implements Graph<GeoNode>{
                 if (neighboursAroundMatchingBaseNeighbourOfParent.baseNodes.get(j).getId().equals(parent.getId())) {
                     compound.extenesionNodes.add(
                             neighboursAroundMatchingBaseNeighbourOfParent.extenesionNodes.get(
-                                    (j -  i /* (-1 * i + 1)*/  /* TODO */ + neighboursAroundMatchingBaseNeighbourOfParent.extenesionNodes.size())
+                                    (j + i - 1 + neighboursAroundMatchingBaseNeighbourOfParent.extenesionNodes.size())
                                             % neighboursAroundMatchingBaseNeighbourOfParent.extenesionNodes.size()
                             ));
                 }
@@ -131,21 +131,25 @@ public class ExtensionGraph implements Graph<GeoNode>{
         return id.matches("[0-9]*[a-z]");
     }
 
-    public static<E extends GeoNode> double calcDeg(E origin, E dest) {
+    public static<E extends GeoNode> double calcDeg(E origin, E dest, double offset) {
         Vec2 originVec = new Vec2(origin.getLatitude(),origin.getLongitude());
         Vec2 destVec = new Vec2(dest.getLatitude(), dest.getLongitude());
 
         Vec2 delta = destVec.add(originVec.scale(-1));
 
-        return Math.abs((Math.toDegrees(Math.atan2(-delta.y, -delta.x)) - 270) % 360);
+        return Math.abs((Math.toDegrees(Math.atan2(-delta.y, -delta.x)) - 270 + offset) % 360);
+    }
+
+    public static<E extends GeoNode> double calcDeg(E origin, E dest) {
+        return calcDeg(origin, dest, 0);
     }
 
     private record Compound<E extends GeoNode> (List<E> baseNodes, List<E> extenesionNodes){}
 
-    private record DegreeComparator<E extends GeoNode>(E origin) implements Comparator<E> {
+    private record DegreeComparator<E extends GeoNode>(E origin, double offset) implements Comparator<E> {
         @Override
         public int compare(E e1, E e2) {
-            return Comparator.comparingDouble((E n) -> calcDeg(origin, n))
+            return Comparator.comparingDouble((E n) -> calcDeg(origin, n, offset))
                     .compare(e1, e2);
         }
     }
