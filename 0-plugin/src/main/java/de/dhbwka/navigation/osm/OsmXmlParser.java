@@ -63,7 +63,7 @@ public class OsmXmlParser {
                         if ("width".equals(k) || "maxwidth".equals(k) || "est_width".equals(k)) {
                             streetwidth = parseWidth(v);
                         }
-                        if ("train".equals(k) && "yes".equals(v) || "tram".equals(k) && "yes".equals(v)) {
+                        if ("train".equals(k) && "yes".equals(v) || "tram".equals(k) && "yes".equals(v) || "railway".equals(k) && "tram".equals(v)) {
                             rejectedWay = true;
                         }
                     }
