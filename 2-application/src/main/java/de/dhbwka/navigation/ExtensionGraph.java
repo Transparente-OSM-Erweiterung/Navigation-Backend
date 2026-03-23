@@ -76,7 +76,9 @@ public class ExtensionGraph implements Graph<GeoNode>{
             }
             compound.extenesionNodes.add(new ExtensionNode(node.getId() + (char)('a' + i), intersection.x, intersection.y));
         }
-        compound.extenesionNodes.sort(new DegreeComparator<>(node, calcDeg(node, compound.baseNodes.getFirst())));
+        if(!compound.baseNodes.isEmpty()) {
+            compound.extenesionNodes.sort(new DegreeComparator<>(node, calcDeg(node, compound.baseNodes.getFirst())));
+        }
         return compound;
     }
 
@@ -90,17 +92,17 @@ public class ExtensionGraph implements Graph<GeoNode>{
         Compound<GeoNode> parentNeighbors = getNeighborsOfBaseNode(parent);
 
         if(parentNeighbors.extenesionNodes.size() > 1) {
-        for (int i = 0; i < parentNeighbors.extenesionNodes.size(); i++) {
-            if(parentNeighbors.extenesionNodes.get(i).getId().equals(node.getId())){
-                GeoNode left = parentNeighbors.extenesionNodes.get((i - 1 + parentNeighbors.extenesionNodes.size()) % parentNeighbors.extenesionNodes.size());
-                GeoNode right = parentNeighbors.extenesionNodes.get((i + 1) % parentNeighbors.extenesionNodes.size());
-                compound.extenesionNodes.add(left);
-                if (left != right) {
-                    compound.extenesionNodes.add(parentNeighbors.extenesionNodes.get((i + 1) % parentNeighbors.extenesionNodes.size()));
+            for (int i = 0; i < parentNeighbors.extenesionNodes.size(); i++) {
+                if(parentNeighbors.extenesionNodes.get(i).getId().equals(node.getId())){
+                    GeoNode left = parentNeighbors.extenesionNodes.get((i - 1 + parentNeighbors.extenesionNodes.size()) % parentNeighbors.extenesionNodes.size());
+                    GeoNode right = parentNeighbors.extenesionNodes.get((i + 1) % parentNeighbors.extenesionNodes.size());
+                    compound.extenesionNodes.add(left);
+                    if (left != right) {
+                        compound.extenesionNodes.add(parentNeighbors.extenesionNodes.get((i + 1) % parentNeighbors.extenesionNodes.size()));
+                    }
+                    break;
                 }
-                break;
             }
-        }
         }
 
         List<GeoNode>  matchingBaseNeighboursOfParent = List.of(
