@@ -2,10 +2,10 @@ package de.dhbwka.navigation;
 
 import java.util.*;
 
-public class InMemoryGraph<T extends Node> implements Graph<T>, GraphBuilder<T> {
+public class InMemoryGraph<T extends Node> implements GraphWithWidth<T>, GraphBuilder<T> {
 
     private final Map<String, T> nodes = new HashMap<>();
-    private final Map<String, List<T>> adjacencyMap = new HashMap<>();
+    private final Map<String, List<NodeWithWidth<T>>> adjacencyMap = new HashMap<>();
 
     @Override
     public Optional<T> getNode(String id) {
@@ -16,7 +16,7 @@ public class InMemoryGraph<T extends Node> implements Graph<T>, GraphBuilder<T> 
     @Override
     public Collection<T> getNeighbors(T node) {
         Objects.requireNonNull(node);
-        return adjacencyMap.getOrDefault(node.getId(), List.of());
+        return adjacencyMap.get(node.getId()).stream().map(nww -> nww.node).toList();
     }
 
     @Override
@@ -27,7 +27,7 @@ public class InMemoryGraph<T extends Node> implements Graph<T>, GraphBuilder<T> 
     }
 
     @Override
-    public void addEdge(String fromId, String toId, boolean bidirectional) {
+    public void addEdge(String fromId, String toId, boolean bidirectional, double streetwidth) {
         Objects.requireNonNull(fromId);
         Objects.requireNonNull(toId);
         T fromNode = nodes.get(fromId);
@@ -35,9 +35,17 @@ public class InMemoryGraph<T extends Node> implements Graph<T>, GraphBuilder<T> 
         if (fromNode == null || toNode == null) {
             throw new IllegalArgumentException("Both nodes must exist before adding an edge: " + fromId + " => " + toId);
         }
-        adjacencyMap.get(fromId).add(toNode);
+
+        adjacencyMap.get(fromId).add(new NodeWithWidth<>(toNode, streetwidth));
         if(bidirectional){
-            adjacencyMap.get(toId).add(fromNode);
+            adjacencyMap.get(toId).add(new NodeWithWidth<>(fromNode, streetwidth));
         }
     }
+
+    @Override
+    public double getWidth(String fromId, String toId) {
+        return adjacencyMap.get(fromId).stream().filter(nww -> nww.node.getId().equals(toId)).findFirst().orElseThrow().width;
+    }
+
+    private record NodeWithWidth<T extends Node> (T node, Double width){}
 }

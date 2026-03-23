@@ -3,12 +3,12 @@ package de.dhbwka.navigation;
 import java.util.*;
 
 public class ExtensionGraph implements Graph<GeoNode>{
-    private final Graph<GeoNode> graph;
+    private final GraphWithWidth<GeoNode> graph;
 
     private final double STREET_WIDTH = 0.00002;
 
 
-    public ExtensionGraph(Graph<GeoNode> graph) {
+    public ExtensionGraph(GraphWithWidth<GeoNode> graph) {
         this.graph = graph;
     }
 
@@ -52,8 +52,18 @@ public class ExtensionGraph implements Graph<GeoNode>{
             Vec2 normal1 = u1.rot90right();
             Vec2 normal2 = u2.rot90left();
 
-            Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH / 2));
-            Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH / 2));
+            Vec2 p1 = origin.add(
+                    graph.getWidth(node.getId(),
+                            compound.baseNodes.get(i).getId())
+            );
+
+            Vec2 p2 = origin.add(
+                    graph.getWidth(node.getId(),
+                            compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getId())
+            );
+
+            //Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH / 2));
+            //Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH / 2));
 
             // g: point1 + u1 * s
             // f: point2 + u2 * t

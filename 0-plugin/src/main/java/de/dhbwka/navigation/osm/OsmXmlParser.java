@@ -16,6 +16,8 @@ import java.util.Map;
 public class OsmXmlParser {
     private final GraphBuilder<GeoNode> graphBuilder;
 
+    private final double DEFAULT_WIDTH = 2.75;
+
     public OsmXmlParser(GraphBuilder<GeoNode> graphBuilder) {
         this.graphBuilder = graphBuilder;
     }
@@ -27,7 +29,8 @@ public class OsmXmlParser {
         Map<String, OsmNode> nodes = new HashMap<>();
 
         List<String> currentWayNodes = new ArrayList<>();
-        boolean currentWayOneWay = false;
+
+        double streetwidth = DEFAULT_WIDTH;
 
         while (reader.hasNext()) {
             int event = reader.next();
@@ -46,7 +49,7 @@ public class OsmXmlParser {
                     }
                     case "way" -> {
                         currentWayNodes.clear();
-                        currentWayOneWay = false;
+                        streetwidth = DEFAULT_WIDTH;
                     }
                     case "nd" -> {
                         String ref = reader.getAttributeValue(null, "ref");
@@ -55,8 +58,8 @@ public class OsmXmlParser {
                     case "tag" -> {
                         String k = reader.getAttributeValue(null, "k");
                         String v = reader.getAttributeValue(null, "v");
-                        if ("oneway".equals(k) && ("yes".equals(v) || "true".equals(v) || "1".equals(v))) {
-                            currentWayOneWay = true;
+                        if ("width".equals(k) || "maxwidth".equals(k) || "est_width".equals(k)) {
+                            streetwidth = parseWidth(v);
                         }
                     }
                 }
@@ -67,12 +70,34 @@ public class OsmXmlParser {
                     for (int i = 0; i < currentWayNodes.size() - 1; i++) {
                         String fromId = currentWayNodes.get(i);
                         String toId = currentWayNodes.get(i + 1);
-                        graphBuilder.addEdge(fromId, toId, !currentWayOneWay);
+                        graphBuilder.addEdge(fromId, toId, streetwidth);
                     }
                 }
             }
         }
 
         reader.close();
+    }
+
+    private double parseWidth(String widthStr) {
+        if (widthStr == null || widthStr.trim().isEmpty()) return DEFAULT_WIDTH;
+        String input = widthStr.trim();
+        try {
+            String numericPart = input.replaceAll("(?i)[^0-9.].*", "");
+            String unitPart = input.substring(numericPart.length()).trim().toLowerCase();
+            if (numericPart.isEmpty()) return DEFAULT_WIDTH;
+
+            double value = Double.parseDouble(numericPart);
+            return switch (unitPart) {
+                case "m", "meter", "meters" -> value;
+                case "km", "kilometer", "kilometers" -> value * 1000.;
+                case "ft", "feet" -> value * 0.3048;
+                case "in", "inch", "inches" -> value * 0.0254;
+                case "mi", "miles" -> value * 1609.34;
+                default -> value; // Assume meters if no unit or unrecognized unit
+            };
+        } catch (Exception e) {
+            return DEFAULT_WIDTH;
+        }
     }
 }
