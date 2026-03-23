@@ -52,15 +52,15 @@ public class ExtensionGraph implements Graph<GeoNode>{
             Vec2 normal1 = u1.rot90right();
             Vec2 normal2 = u2.rot90left();
 
-            Vec2 p1 = origin.add(
+            Vec2 p1 = origin.add(normal1.scale(
                     graph.getWidth(node.getId(),
                             compound.baseNodes.get(i).getId())
-            );
+            /2));
 
-            Vec2 p2 = origin.add(
+            Vec2 p2 = origin.add(normal1.scale(
                     graph.getWidth(node.getId(),
                             compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getId())
-            );
+            /2));
 
             //Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH / 2));
             //Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH / 2));
