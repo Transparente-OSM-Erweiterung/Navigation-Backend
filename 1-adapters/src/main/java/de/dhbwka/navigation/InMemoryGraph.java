@@ -16,6 +16,7 @@ public class InMemoryGraph<T extends Node> implements GraphWithWidth<T>, GraphBu
     @Override
     public Collection<T> getNeighbors(T node) {
         Objects.requireNonNull(node);
+        if(adjacencyMap.get(node.getId()) == null) return List.of();
         return adjacencyMap.get(node.getId()).stream().map(nww -> nww.node).toList();
     }
 

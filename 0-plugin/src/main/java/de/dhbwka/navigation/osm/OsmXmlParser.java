@@ -31,6 +31,7 @@ public class OsmXmlParser {
         List<String> currentWayNodes = new ArrayList<>();
 
         double streetwidth = DEFAULT_WIDTH;
+        boolean rejectedWay = false;
 
         while (reader.hasNext()) {
             int event = reader.next();
@@ -50,6 +51,7 @@ public class OsmXmlParser {
                     case "way" -> {
                         currentWayNodes.clear();
                         streetwidth = DEFAULT_WIDTH;
+                        rejectedWay = false;
                     }
                     case "nd" -> {
                         String ref = reader.getAttributeValue(null, "ref");
@@ -61,12 +63,15 @@ public class OsmXmlParser {
                         if ("width".equals(k) || "maxwidth".equals(k) || "est_width".equals(k)) {
                             streetwidth = parseWidth(v);
                         }
+                        if ("train".equals(k) && "yes".equals(v) || "tram".equals(k) && "yes".equals(v)) {
+                            rejectedWay = true;
+                        }
                     }
                 }
             } else if (event == XMLStreamConstants.END_ELEMENT) {
                 String name = reader.getLocalName();
 
-                if ("way".equals(name) && currentWayNodes.size() > 1) {
+                if ("way".equals(name) && currentWayNodes.size() > 1 && !rejectedWay) {
                     for (int i = 0; i < currentWayNodes.size() - 1; i++) {
                         String fromId = currentWayNodes.get(i);
                         String toId = currentWayNodes.get(i + 1);

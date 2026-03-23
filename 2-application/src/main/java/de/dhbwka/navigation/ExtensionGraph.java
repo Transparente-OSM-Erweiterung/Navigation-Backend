@@ -35,35 +35,37 @@ public class ExtensionGraph implements Graph<GeoNode>{
         compound.baseNodes.addAll(graph.getNeighbors(node));
         compound.baseNodes.sort(new DegreeComparator<>(node, 0));
 
-        Vec2 origin = new Vec2(node.getLatitude(), node.getLongitude());
+        Vec2 projectionReference = node.toVec2();
+        Vec2 localOrigin = Projection.projectToLocal(projectionReference, projectionReference);
 
         for (int i = 0; i < compound.baseNodes.size(); i++) {
-            Vec2 u1 = new Vec2(
-                    compound.baseNodes.get(i).getLatitude(),
-                    compound.baseNodes.get(i).getLongitude())
-                    .add(origin.scale(-1))
-                    .normalized();
-            Vec2 u2 = new Vec2(
-                    compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getLatitude(),
-                    compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getLongitude())
-                    .add(origin.scale(-1))
-                    .normalized();
+            Vec2 localNeighbor1 = Projection.projectToLocal(
+                    compound.baseNodes.get(i).toVec2(),
+                    projectionReference
+            );
+            Vec2 localNeighbor2 = Projection.projectToLocal(
+                    compound.baseNodes.get((i + 1) % compound.baseNodes.size()).toVec2(),
+                    projectionReference
+            );
+
+            Vec2 u1 = localNeighbor1.add(localOrigin.negated()).normalized();
+            Vec2 u2 = localNeighbor2.add(localOrigin.negated()).normalized();
 
             Vec2 normal1 = u1.rot90right();
             Vec2 normal2 = u2.rot90left();
 
-            Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH *
-                    graph.getWidth(node.getId(),
-                            compound.baseNodes.get(i).getId())
-            /2));
-
-            Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH *
-                    graph.getWidth(node.getId(),
-                            compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getId())
-            /2));
-
-            //Vec2 p1 = origin.add(normal1.scale(STREET_WIDTH / 2));
-            //Vec2 p2 = origin.add(normal2.scale(STREET_WIDTH / 2));
+            Vec2 p1 = localOrigin.add(normal1.scale(
+                    0.5 * graph.getWidth(
+                            node.getId(),
+                            compound.baseNodes.get(i).getId()
+                    )
+            ));
+            Vec2 p2 = localOrigin.add(normal2.scale(
+                    0.5 * graph.getWidth(
+                            node.getId(),
+                            compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getId()
+                    )
+            ));
 
             // g: point1 + u1 * s
             // f: point2 + u2 * t
@@ -77,15 +79,23 @@ public class ExtensionGraph implements Graph<GeoNode>{
             );
             Vec2 rhs = p2.add(p1.negated());
 
-            Vec2 intersection;
+            Vec2 localIntersection;
             try {
                 double s = Cramer2Solve.solveX(mat, rhs);
-                intersection = p1.add(u1.scale(s));
+                localIntersection = p1.add(u1.scale(s));
             } catch (IllegalArgumentException e) {
-                intersection = p1.add(p2).scale(0.5);
+                localIntersection = p1.add(p2).scale(0.5);
             }
-            compound.extenesionNodes.add(new ExtensionNode(node.getId() + (char)('a' + i), intersection.x, intersection.y));
+
+            Vec2 globalIntersection = Projection.unprojectToGlobal(localIntersection, projectionReference);
+
+            compound.extenesionNodes.add(new ExtensionNode(
+                    node.getId() + (char)('a' + i),
+                    globalIntersection.x,
+                    globalIntersection.y)
+            );
         }
+
         if(!compound.baseNodes.isEmpty()) {
             compound.extenesionNodes.sort(new DegreeComparator<>(node, calcDeg(node, compound.baseNodes.getFirst())));
         }
@@ -144,12 +154,17 @@ public class ExtensionGraph implements Graph<GeoNode>{
     }
 
     public static<E extends GeoNode> double calcDeg(E origin, E dest, double offset) {
-        Vec2 originVec = new Vec2(origin.getLatitude(),origin.getLongitude());
-        Vec2 destVec = new Vec2(dest.getLatitude(), dest.getLongitude());
+        Vec2 originVec = origin.toVec2();
+        Vec2 destVec = dest.toVec2();
 
-        Vec2 delta = destVec.add(originVec.scale(-1));
+        Vec2 localOrigin = Projection.projectToLocal(originVec, originVec);
+        Vec2 localDest = Projection.projectToLocal(destVec, originVec);
 
-        return Math.abs((Math.toDegrees(Math.atan2(-delta.y, -delta.x)) - 270 + offset) % 360);
+        Vec2 dir = localDest.add(localOrigin.negated());
+
+        double angleDegrees = Math.toDegrees(Math.atan2(-dir.y, -dir.x));
+
+        return Math.abs((angleDegrees - 270 + offset) % 360);
     }
 
     public static<E extends GeoNode> double calcDeg(E origin, E dest) {
