@@ -1,6 +1,8 @@
 package de.dhbwka.navigation.osm;
 
+import de.dhbwka.navigation.GeoEdge;
 import de.dhbwka.navigation.GeoNode;
+import de.dhbwka.navigation.Graph;
 import de.dhbwka.navigation.GraphBuilder;
 
 import javax.xml.stream.XMLInputFactory;
@@ -14,11 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 public class OsmXmlParser {
-    private final GraphBuilder<GeoNode> graphBuilder;
+    private final GraphBuilder<GeoNode, GeoEdge<GeoNode>> graphBuilder;
 
     private final double DEFAULT_WIDTH = 2.75;
 
-    public OsmXmlParser(GraphBuilder<GeoNode> graphBuilder) {
+    public OsmXmlParser(GraphBuilder<GeoNode, GeoEdge<GeoNode>> graphBuilder) {
         this.graphBuilder = graphBuilder;
     }
 
@@ -76,6 +78,7 @@ public class OsmXmlParser {
                         String fromId = currentWayNodes.get(i);
                         String toId = currentWayNodes.get(i + 1);
                         graphBuilder.addEdge(fromId, toId, streetwidth);
+                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(fromId).orElseThrow(), graphBuilder.getNode(toId).orElseThrow(), false, StreetType.STREET , streetwidth));
                     }
                 }
             }

@@ -1,8 +1,8 @@
 package de.dhbwka.navigation;
 
-public class Projection {
+import static de.dhbwka.navigation.Constants.EARTH_RADIUS_METERS;
 
-    private static final double EARTH_RADIUS_METERS = 6371000.0;
+public class Projection {
     private static final double METERS_PER_DEGREE = (2 * Math.PI * EARTH_RADIUS_METERS / 360.0);
 
     public static Vec2 projectToLocal(Vec2 globalPos, Vec2 reference) {

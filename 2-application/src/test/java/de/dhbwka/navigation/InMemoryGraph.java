@@ -2,31 +2,46 @@ package de.dhbwka.navigation;
 
 import java.util.*;
 
-public class InMemoryGraph<T extends Node> implements GraphWithWidth<T>, GraphBuilder<T> {
+public class InMemoryGraph<NodeType extends Node, EdgeType extends Edge<NodeType>> implements GraphWithWidth<NodeType, EdgeType>, GraphBuilder<NodeType, EdgeType> {
 
-    private final Map<String, T> nodes = new HashMap<>();
-    private final Map<String, List<T>> adjacencyMap = new HashMap<>();
+    private final Map<String, NodeType> nodes = new HashMap<>();
+    private final Map<String, List<NodeType>> adjacencyMap = new HashMap<>();
+
+    private final Map<String, List<EdgeType>> edgeMap = new HashMap<>();
 
     @Override
-    public Optional<T> getNode(String id) {
+    public Optional<NodeType> getNode(String id) {
         return Optional.ofNullable(nodes.get(id));
     }
 
+    @Deprecated
     @Override
-    public Collection<T> getNeighbors(T node) {
+    public Collection<NodeType> getNeighbors(NodeType node) {
         return adjacencyMap.getOrDefault(node.getId(), List.of());
     }
 
     @Override
-    public void addNode(T node) {
-        nodes.putIfAbsent(node.getId(), node);
-        adjacencyMap.computeIfAbsent(node.getId(), k -> new ArrayList<>());
+    public Collection<EdgeType> getEdgesFrom(NodeType node) {
+        return edgeMap.get(node.getId());
     }
 
     @Override
-    public void addEdge(String fromId, String toId, boolean bidirectional) {
-        T fromNode = nodes.get(fromId);
-        T toNode = nodes.get(toId);
+    public void addNode(NodeType node) {
+        nodes.putIfAbsent(node.getId(), node);
+        adjacencyMap.computeIfAbsent(node.getId(), k -> new ArrayList<>());
+        edgeMap.computeIfAbsent(node.getId(), k -> new ArrayList<>());
+    }
+
+    @Override
+    public void addEdge(EdgeType edge) {
+        edgeMap.get(edge.getOrigin().getId()).add(edge);
+    }
+
+    @Deprecated
+    @Override
+    public void addEdge(String fromId, String toId, boolean bidirectional, double streetWidth) {
+        NodeType fromNode = nodes.get(fromId);
+        NodeType toNode = nodes.get(toId);
         if (fromNode == null || toNode == null) {
             throw new IllegalArgumentException("Both nodes must exist before adding an edge: " + fromId + " => " + toId);
         }

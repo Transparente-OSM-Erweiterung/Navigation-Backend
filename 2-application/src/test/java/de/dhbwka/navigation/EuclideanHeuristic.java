@@ -1,9 +1,9 @@
 package de.dhbwka.navigation;
 
-public class EuclideanScorer<T extends VectorNode> implements Scorer<T> {
+public class EuclideanHeuristic<T extends VectorNode> implements Heuristic<T> {
 
     @Override
-    public double computeCost(T from, T to) {
+    public double estimate(T from, T to) {
         double[] a = from.getComponents();
         double[] b = to.getComponents();
 

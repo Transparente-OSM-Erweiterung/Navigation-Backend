@@ -1,19 +1,22 @@
 package de.dhbwka.navigation;
 
-public class PathAwareNode<T extends Node> implements Node, Comparable<PathAwareNode<T>> {
-    private final T current;
-    private PathAwareNode<T> predecessor;
+public class PathAwareNode<NodeType extends Node, EdgeType extends Edge<NodeType>> implements Node, Comparable<PathAwareNode<NodeType, EdgeType>> {
+    private final NodeType current;
+    private PathAwareNode<NodeType, EdgeType> predecessor;
     private double routeScore, estimatedScore;
 
-    public PathAwareNode(T current, PathAwareNode<T> predecessor, double routeScore, double estimatedScore) {
+    private EdgeType edge;
+
+    public PathAwareNode(NodeType current, PathAwareNode<NodeType, EdgeType> predecessor, double routeScore, double estimatedScore, EdgeType edge) {
         this.current = current;
         this.predecessor = predecessor;
         this.routeScore = routeScore;
         this.estimatedScore = estimatedScore;
+        this.edge = edge;
     }
 
-    public PathAwareNode(T current) {
-        this(current, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+    public PathAwareNode(NodeType current) {
+        this(current, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, null);
     }
 
     @Override
@@ -22,20 +25,24 @@ public class PathAwareNode<T extends Node> implements Node, Comparable<PathAware
     }
 
     @Override
-    public int compareTo(PathAwareNode<T> other) {
+    public int compareTo(PathAwareNode<NodeType, EdgeType> other) {
         return Double.compare(this.estimatedScore, other.estimatedScore);
     }
 
-    public T getCurrent() {
+    public NodeType getCurrent() {
         return current;
     }
 
-    public PathAwareNode<T> getPredecessor() {
+    public PathAwareNode<NodeType, EdgeType> getPredecessor() {
         return predecessor;
     }
 
-    public void setPredecessor(PathAwareNode<T> predecessor) {
+    public void setPredecessor(PathAwareNode<NodeType, EdgeType> predecessor) {
         this.predecessor = predecessor;
+    }
+
+    public void setEdge(EdgeType edge) {
+        this.edge = edge;
     }
 
     public double getRouteScore() {
@@ -52,5 +59,9 @@ public class PathAwareNode<T extends Node> implements Node, Comparable<PathAware
 
     public void setEstimatedScore(double estimatedScore) {
         this.estimatedScore = estimatedScore;
+    }
+
+    public EdgeType getEdge() {
+        return edge;
     }
 }

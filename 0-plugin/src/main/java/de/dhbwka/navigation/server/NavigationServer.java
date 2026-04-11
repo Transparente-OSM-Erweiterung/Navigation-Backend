@@ -20,14 +20,14 @@ import java.util.Map;
 
 public class NavigationServer {
 
-    InMemoryGraph<GeoNode> graph;
-    PathFinder<GeoNode> pathFinder;
+    InMemoryGraph<GeoNode, GeoEdge<GeoNode>> graph;
+    PathFinder<GeoNode, GeoEdge<GeoNode>> pathFinder;
 
     public NavigationServer() throws FileNotFoundException, XMLStreamException {
         graph = new InMemoryGraph<>();
         OsmXmlParser parser = new OsmXmlParser(graph);
         parser.parse(new FileInputStream("./run/map.osm"));
-        pathFinder = new AStarPathFinder<>(new ExtensionGraph(graph), new HaversineScorer<>(), new HaversineScorer<>());
+        pathFinder = new AStarPathFinder<>(new ExtensionGraph(graph), new HarversineEdgeScorer<>(), new HaversineHeuristic<>());
     }
 
     public void start() throws IOException {
@@ -59,10 +59,10 @@ public class NavigationServer {
         String start = parts[0];
         String end = parts[1];
 
-        List<GeoNode> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
+        List<GeoEdge<GeoNode>> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
         String responseJson = String.format("""
                 %s
-                """, path.stream().map(n -> "[" + n.getLongitude() + ", " + n.getLatitude() + "]").toList());
+                """, path.stream().map(n -> "[" + n.getOrigin().getLongitude() + ", " + n.getOrigin().getLatitude() + "]").toList()); //TODO
         byte[] responseBytes = responseJson.getBytes(StandardCharsets.UTF_8);
         exchange.sendResponseHeaders(200, responseBytes.length);
         try (OutputStream os = exchange.getResponseBody()) {

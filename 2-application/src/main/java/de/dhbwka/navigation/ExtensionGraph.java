@@ -2,13 +2,11 @@ package de.dhbwka.navigation;
 
 import java.util.*;
 
-public class ExtensionGraph implements Graph<GeoNode>{
-    private final GraphWithWidth<GeoNode> graph;
-
-    private final double STREET_WIDTH = 0.00002;
+public class ExtensionGraph implements Graph<GeoNode, GeoEdge<GeoNode>>{
+    private final GraphWithWidth<GeoNode, GeoEdge<GeoNode>> graph;
 
 
-    public ExtensionGraph(GraphWithWidth<GeoNode> graph) {
+    public ExtensionGraph(GraphWithWidth<GeoNode, GeoEdge<GeoNode>> graph) {
         this.graph = graph;
     }
 
@@ -27,6 +25,12 @@ public class ExtensionGraph implements Graph<GeoNode>{
         List<GeoNode> ret = new ArrayList<>(nb.baseNodes);
         ret.addAll(nb.extenesionNodes);
         return ret;
+    }
+
+    @Override
+    public Collection<GeoEdge<GeoNode>> getEdgesFrom(GeoNode node) {
+        //TODO
+        return null;
     }
 
     private Compound<GeoNode> getNeighborsOfBaseNode(GeoNode node) {

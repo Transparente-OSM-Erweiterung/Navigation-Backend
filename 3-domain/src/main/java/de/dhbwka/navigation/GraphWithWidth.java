@@ -1,5 +1,5 @@
 package de.dhbwka.navigation;
 
-public interface GraphWithWidth<T extends Node> extends Graph<T> {
+public interface GraphWithWidth<NodeType extends Node, EdgeType extends Edge<NodeType>> extends Graph<NodeType, EdgeType> {
     double getWidth(String fromId, String toId);
 }

@@ -23,10 +23,10 @@ class ExtensionGraphTest {
                 new GeoTestNode("3", 0, -1),
                 new GeoTestNode("4", -1, 0)
         );
-        InMemoryGraph<GeoNode> graph = new InMemoryGraph<>();
+        InMemoryGraph<GeoNode, GeoEdge<GeoNode>> graph = new InMemoryGraph<>();
         graph.addNode(origin);
         neighbors.forEach(graph::addNode);
-        neighbors.forEach(n -> graph.addEdge(origin.getId(), n.getId()));
+        neighbors.forEach(n -> graph.addEdge(origin.getId(), n.getId(), 1));
         GeoTestNode.Factory factory = new GeoTestNode.Factory();
         ExtensionGraph extGraph = new ExtensionGraph(graph);
         Collection<GeoNode> extNeighbours = extGraph.getNeighbors(origin);
@@ -92,10 +92,10 @@ class ExtensionGraphTest {
                 new GeoTestNode("3", 0, -1),
                 new GeoTestNode("4", -1, 0)
         );
-        InMemoryGraph<GeoNode> graph = new InMemoryGraph<>();
+        InMemoryGraph<GeoNode, GeoEdge<GeoNode>> graph = new InMemoryGraph<>();
         graph.addNode(main);
         neighboursOfMain.forEach(graph::addNode);
-        neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId()));
+        neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId(), 1));
         ExtensionGraph extGraph = new ExtensionGraph(graph);
         Collection<GeoNode> extNeighbours = extGraph.getNeighbors(origin);
 
@@ -117,10 +117,10 @@ class ExtensionGraphTest {
                 new GeoTestNode("3", 0, -1),
                 new GeoTestNode("4", -1, 0)
         );
-        InMemoryGraph<GeoNode> graph = new InMemoryGraph<>();
+        InMemoryGraph<GeoNode, GeoEdge<GeoNode>> graph = new InMemoryGraph<>();
         graph.addNode(main);
         neighboursOfMain.forEach(graph::addNode);
-        neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId()));
+        neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId(), 1));
         ExtensionGraph extGraph = new ExtensionGraph(graph);
         Collection<GeoNode> extNeighbours = extGraph.getNeighbors(main);
 
@@ -145,10 +145,10 @@ class ExtensionGraphTest {
                 new GeoTestNode("1600203549", 49.0040778, 8.4000694),
                 new GeoTestNode("12599995589", 49.0039223, 8.4000615)
         );
-        InMemoryGraph<GeoNode> graph = new InMemoryGraph<>();
+        InMemoryGraph<GeoNode, GeoEdge<GeoNode>> graph = new InMemoryGraph<>();
         graph.addNode(main);
         neighboursOfMain.forEach(graph::addNode);
-        neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId()));
+        neighboursOfMain.forEach(n -> graph.addEdge(main.getId(), n.getId(), 1));
         ExtensionGraph extGraph = new ExtensionGraph(graph);
         Collection<GeoNode> extNeighbours = extGraph.getNeighbors(main);
 

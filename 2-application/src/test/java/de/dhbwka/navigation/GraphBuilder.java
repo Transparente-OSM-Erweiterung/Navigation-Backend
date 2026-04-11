@@ -1,11 +1,21 @@
 package de.dhbwka.navigation;
 
-public interface GraphBuilder<T extends Node> {
-    void addNode(T node);
+import java.util.Optional;
 
-    void addEdge(String fromId, String toId, boolean bidirectional);
-    default void addEdge(String fromId, String toId) {
-        addEdge(fromId, toId, true);
+public interface GraphBuilder<NodeType extends Node, EdgeType extends Edge<NodeType>> {
+    void addNode(NodeType node);
+
+    void addEdge(EdgeType edge);
+
+    Optional<NodeType> getNode(String id);
+
+
+    @Deprecated
+    void addEdge(String fromId, String toId, boolean bidirectional, double streetWidth);
+
+    @Deprecated
+    default void addEdge(String fromId, String toId, double streetWidth) {
+        addEdge(fromId, toId, true, streetWidth);
     }
 
 }

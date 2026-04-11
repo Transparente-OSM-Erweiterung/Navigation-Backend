@@ -2,6 +2,6 @@ package de.dhbwka.navigation;
 
 import java.util.List;
 
-public interface PathFinder<T extends Node> {
-    List<T> findPath(T start, T destination);
+public interface PathFinder<NodeType extends Node, EdgeType extends Edge<NodeType>> {
+    List<EdgeType> findPath(NodeType start, NodeType destination);
 }

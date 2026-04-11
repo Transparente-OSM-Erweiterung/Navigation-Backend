@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AStarPathFinderTest {
-    private static final InMemoryGraph<Vector2Node> graph = new InMemoryGraph<>();
-    private static final PathFinder<Vector2Node> pathFinder = new AStarPathFinder<>(graph, new EuclideanScorer<>(), new EuclideanScorer<>());
+    private static final InMemoryGraph<Vector2Node, Edge<Vector2Node>> graph = new InMemoryGraph<>();
+    private static final PathFinder<Vector2Node, Edge<Vector2Node>> pathFinder = new AStarPathFinder<>(graph, new EuclideanEdgeScorer<>(), new EuclideanHeuristic<>());
 
     @BeforeAll
     static void setUp() {
@@ -25,13 +26,26 @@ class AStarPathFinderTest {
                 "C", "A",
                 "B", "D",
                 "D", "C"
-        ).forEach(graph::addEdge);
+        ).forEach((k, v) -> {
+            graph.addEdge(new Vector2Edge(graph.getNode(k).orElseThrow(), graph.getNode(v).orElseThrow(), false));
+            Vector2Node n1 = graph.getNode(k).orElseThrow();
+            Vector2Node n2 = graph.getNode(v).orElseThrow();
+            Edge<Vector2Node> edge = new Vector2Edge(n1, n2, false);
+            graph.addEdge(edge);
+        });
     }
 
     @Test
     void findPath() {
-        List<Vector2Node> path = pathFinder.findPath(graph.getNode("A").orElseThrow(), graph.getNode("D").orElseThrow());
-        String[] pathString = path.stream().map(Vector2Node::getId).toArray(String[]::new);
-        assertArrayEquals(new String[]{"A", "B", "D"}, pathString);
+        List<Edge<Vector2Node>> path = pathFinder.findPath(graph.getNode("A").orElseThrow(), graph.getNode("D").orElseThrow());
+        String[] pathString = path.stream().map(e->e.getDestination().getId()).toArray(String[]::new);
+        assertArrayEquals(new String[]{"B", "D"}, pathString);
     }
+
+    /*
+    @Test
+    void gettingEdgeCorrectly() {
+        graph.getEdgesFrom(graph.getNode("A").orElseThrow());
+        assertEquals();
+    }*/
 }
