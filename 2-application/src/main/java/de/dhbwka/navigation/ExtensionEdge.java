@@ -15,8 +15,8 @@ public class ExtensionEdge<NodeType extends GeoNode> implements GeoEdge<NodeType
         this.type = type;
     }
 
-    private static final ExtensionEdgeType TYPE_DEFAULT = ExtensionEdgeType.EXTENSION_TO_EXTENSION;
-    private static final boolean DIRECTED_DEFAULT = false;
+    private static final ExtensionEdgeType TYPE_DEFAULT = ExtensionEdgeType.EXTENSION_TO_EXTENSION_ALONG_STREET;
+    private static final boolean DIRECTED_DEFAULT = true;
 
     public ExtensionEdge(NodeType origin, NodeType destination, boolean directed) {
         this(origin, destination, directed, TYPE_DEFAULT);

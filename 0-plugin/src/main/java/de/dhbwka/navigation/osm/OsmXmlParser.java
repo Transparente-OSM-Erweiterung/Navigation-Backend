@@ -10,10 +10,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class OsmXmlParser {
     private final GraphBuilder<GeoNode, GeoEdge<GeoNode>> graphBuilder;
@@ -78,7 +75,8 @@ public class OsmXmlParser {
                         String fromId = currentWayNodes.get(i);
                         String toId = currentWayNodes.get(i + 1);
                         graphBuilder.addEdge(fromId, toId, streetwidth);
-                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(fromId).orElseThrow(), graphBuilder.getNode(toId).orElseThrow(), false, StreetType.STREET , streetwidth));
+                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(fromId).orElseThrow(), graphBuilder.getNode(toId).orElseThrow(), true, StreetType.STREET , streetwidth));
+                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(toId).orElseThrow(), graphBuilder.getNode(fromId).orElseThrow(), true, StreetType.STREET , streetwidth));
                     }
                 }
             }
@@ -86,6 +84,7 @@ public class OsmXmlParser {
 
         reader.close();
     }
+
 
     private double parseWidth(String widthStr) {
         if (widthStr == null || widthStr.trim().isEmpty()) return DEFAULT_WIDTH;
