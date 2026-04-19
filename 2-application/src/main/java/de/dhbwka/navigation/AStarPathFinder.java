@@ -2,14 +2,21 @@ package de.dhbwka.navigation;
 
 import java.util.*;
 
-public class AStarPathFinder<NodeType extends Node, EdgeType extends Edge<NodeType>> implements PathFinder<NodeType, EdgeType> {
+public class AStarPathFinder<
+        NodeType extends Node,
+        EdgeType extends Edge<? extends NodeType>
+    > implements PathFinder<NodeType, EdgeType> {
 
     private final Graph<NodeType, EdgeType> graph;
     private final Heuristic<? super NodeType> heuristic;
 
     private final EdgeScorer<? super NodeType, ? super EdgeType> edgeScorer;
 
-    public AStarPathFinder(Graph<NodeType, EdgeType> graph, EdgeScorer<? super NodeType, ? super EdgeType> edgeScorer, Heuristic<? super NodeType> heuristic) {
+    public AStarPathFinder(
+            Graph<NodeType, EdgeType> graph,
+            EdgeScorer<? super NodeType, ? super EdgeType> edgeScorer,
+            Heuristic<? super NodeType> heuristic
+    ) {
         this.graph = Objects.requireNonNull(graph);
         this.edgeScorer = Objects.requireNonNull(edgeScorer);
         this.heuristic = Objects.requireNonNull(heuristic);
@@ -25,7 +32,13 @@ public class AStarPathFinder<NodeType extends Node, EdgeType extends Edge<NodeTy
         Map<String, PathAwareNode<NodeType, EdgeType>> closedList = new HashMap<>();
 
         // Start Node laden.
-        PathAwareNode<NodeType, EdgeType> startRecord = new PathAwareNode<>(start, null, 0, heuristic.estimate(start, destination), null);
+        PathAwareNode<NodeType, EdgeType> startRecord = new PathAwareNode<>(
+                start,
+                null,
+                0,
+                heuristic.estimate(start, destination),
+                null
+        );
         openList.add(startRecord);
         closedList.put(start.getId(), startRecord);
 
@@ -39,10 +52,13 @@ public class AStarPathFinder<NodeType extends Node, EdgeType extends Edge<NodeTy
             }
 
             // Für alle Nodes die über Edges mit der aktuellen Node verbunden sind.
-            for (EdgeType edge : graph.getEdgesFrom(current.getCurrent())) {
+            for (EdgeType edge : graph.getEdgesFrom(current.getCurrent().getId())) {
                 NodeType neighbor = edge.getDestination();
                 // Node mit Kontextinformationen über den Pfad laden oder neue Node erstellen
-                PathAwareNode<NodeType, EdgeType> neighbourRecord = closedList.computeIfAbsent(neighbor.getId(), id -> new PathAwareNode<>(neighbor));
+                PathAwareNode<NodeType, EdgeType> neighbourRecord = closedList.computeIfAbsent(
+                        neighbor.getId(),
+                        id -> new PathAwareNode<>(neighbor)
+                );
                 // Pfadlänge von Start zur Nachbar Node = Pfadlänge von Start zur jetzigen Node + Pfad länge von der jetzigen Node zur Nachbar Node.
                 double tentativeScore = current.getRouteScore() + edgeScorer.calculateScore(edge);
                 // Falls die berechnete Pfadlänge zum Nachbar kleiner als die bereits gespeicherte.
@@ -53,7 +69,9 @@ public class AStarPathFinder<NodeType extends Node, EdgeType extends Edge<NodeTy
                     neighbourRecord.setRouteScore(tentativeScore);
                     // Heuristik: Update der Entfernung von Nachbar Node bis Ziel.
                     // Gilt als Priorität für die Warteschlange
-                    neighbourRecord.setEstimatedScore(tentativeScore + heuristic.estimate(neighbor, destination));
+                    neighbourRecord.setEstimatedScore(
+                            tentativeScore + heuristic.estimate(neighbor, destination)
+                    );
                     // Speicherung der Node mit Kontextinformationen.
                     openList.add(neighbourRecord);
                 }

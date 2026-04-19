@@ -1,6 +1,6 @@
 package de.dhbwka.navigation;
 
-public class EuclideanEdgeScorer<NodeType extends VectorNode, EdgeType extends Edge<NodeType>> implements EdgeScorer<NodeType, EdgeType> {
+public class EuclideanEdgeScorer<NodeType extends VectorNode, EdgeType extends Edge<? extends NodeType>> implements EdgeScorer<NodeType, EdgeType> {
     @Override
     public double calculateScore(EdgeType edge) {
         NodeType origin = edge.getOrigin();

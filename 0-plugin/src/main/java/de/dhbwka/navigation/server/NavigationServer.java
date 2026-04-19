@@ -3,6 +3,7 @@ package de.dhbwka.navigation.server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import de.dhbwka.navigation.*;
+import de.dhbwka.navigation.osm.OsmEdge;
 import de.dhbwka.navigation.osm.OsmXmlParser;
 
 import javax.xml.stream.XMLStreamException;
@@ -20,14 +21,14 @@ import java.util.Map;
 
 public class NavigationServer {
 
-    InMemoryGraph<GeoNode, GeoEdge<GeoNode>> graph;
-    PathFinder<GeoNode, GeoEdge<GeoNode>> pathFinder;
+    InMemoryGraph<GeoNode, OsmEdge<GeoNode>> graph;
+    PathFinder<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> pathFinder;
 
     public NavigationServer() throws FileNotFoundException, XMLStreamException {
         graph = new InMemoryGraph<>();
         OsmXmlParser parser = new OsmXmlParser(graph);
         parser.parse(new FileInputStream("./run/map.osm"));
-        pathFinder = new AStarPathFinder<>(new ExtensionGraph(graph), new HarversineEdgeScorer<>(), new HaversineHeuristic<>());
+        pathFinder = new AStarPathFinder<>(new ExtensionGraph<>(graph), new HarversineEdgeScorer<>(), new HaversineHeuristic<>());
     }
 
     public void start() throws IOException {
@@ -59,7 +60,7 @@ public class NavigationServer {
         String start = parts[0];
         String end = parts[1];
 
-        List<GeoEdge<GeoNode>> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
+        List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
         String responseJson = String.format("""
                 %s
                 """, path.stream().map(n -> "[" + n.getOrigin().getLongitude() + ", " + n.getOrigin().getLatitude() + "]").toList()); //TODO

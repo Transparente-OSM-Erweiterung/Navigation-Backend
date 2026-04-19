@@ -28,6 +28,13 @@ public class ExtensionNode implements GeoNode{
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "[id= "+id + ", lat=" + latitude + ", lon=" + longitude +"]";
+        return this.getClass().getSimpleName()
+                + "[id= "
+                + id
+                + ", lat="
+                + latitude
+                + ", lon="
+                + longitude
+                +"]";
     }
 }

@@ -1,13 +1,23 @@
 package de.dhbwka.navigation;
 
-public class PathAwareNode<NodeType extends Node, EdgeType extends Edge<NodeType>> implements Node, Comparable<PathAwareNode<NodeType, EdgeType>> {
+public class PathAwareNode<
+        NodeType extends Node,
+        EdgeType extends Edge<? extends NodeType>
+    > implements Node,
+        Comparable<PathAwareNode<NodeType, EdgeType>> {
     private final NodeType current;
     private PathAwareNode<NodeType, EdgeType> predecessor;
     private double routeScore, estimatedScore;
 
     private EdgeType edge;
 
-    public PathAwareNode(NodeType current, PathAwareNode<NodeType, EdgeType> predecessor, double routeScore, double estimatedScore, EdgeType edge) {
+    public PathAwareNode(
+            NodeType current,
+            PathAwareNode<NodeType, EdgeType> predecessor,
+            double routeScore,
+            double estimatedScore,
+            EdgeType edge
+    ) {
         this.current = current;
         this.predecessor = predecessor;
         this.routeScore = routeScore;
@@ -16,7 +26,13 @@ public class PathAwareNode<NodeType extends Node, EdgeType extends Edge<NodeType
     }
 
     public PathAwareNode(NodeType current) {
-        this(current, null, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, null);
+        this(
+                current,
+                null,
+                Double.POSITIVE_INFINITY,
+                Double.POSITIVE_INFINITY,
+                null
+        );
     }
 
     @Override

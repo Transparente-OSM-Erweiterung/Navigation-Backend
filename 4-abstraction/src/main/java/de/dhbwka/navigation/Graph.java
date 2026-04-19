@@ -3,7 +3,10 @@ package de.dhbwka.navigation;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface Graph<NodeType extends Node, EdgeType extends Edge<NodeType>> {
+public interface Graph<
+        NodeType extends Node,
+        EdgeType extends Edge<? extends NodeType>
+    > {
     Optional<NodeType> getNode(String id);
 
     @Deprecated
@@ -12,5 +15,7 @@ public interface Graph<NodeType extends Node, EdgeType extends Edge<NodeType>> {
     /**
      * @return an Edge that is guaranteed to have the node as its origin parameter.
      */
-    Collection<EdgeType> getEdgesFrom(NodeType node);
+    //Collection<EdgeType> getEdgesFrom(NodeType node);
+
+    Collection<EdgeType> getEdgesFrom(String nodeId);
 }

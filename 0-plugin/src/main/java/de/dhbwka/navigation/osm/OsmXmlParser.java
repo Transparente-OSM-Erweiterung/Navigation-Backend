@@ -1,8 +1,6 @@
 package de.dhbwka.navigation.osm;
 
-import de.dhbwka.navigation.GeoEdge;
 import de.dhbwka.navigation.GeoNode;
-import de.dhbwka.navigation.Graph;
 import de.dhbwka.navigation.GraphBuilder;
 
 import javax.xml.stream.XMLInputFactory;
@@ -13,11 +11,11 @@ import java.io.InputStream;
 import java.util.*;
 
 public class OsmXmlParser {
-    private final GraphBuilder<GeoNode, GeoEdge<GeoNode>> graphBuilder;
+    private final GraphBuilder<GeoNode, ? super OsmEdge<GeoNode>> graphBuilder;
 
     private final double DEFAULT_WIDTH = 2.75;
 
-    public OsmXmlParser(GraphBuilder<GeoNode, GeoEdge<GeoNode>> graphBuilder) {
+    public OsmXmlParser(GraphBuilder<GeoNode, ? super OsmEdge<GeoNode>> graphBuilder) {
         this.graphBuilder = graphBuilder;
     }
 
@@ -62,7 +60,7 @@ public class OsmXmlParser {
                         if ("width".equals(k) || "maxwidth".equals(k) || "est_width".equals(k)) {
                             streetwidth = parseWidth(v);
                         }
-                        if ("train".equals(k) && "yes".equals(v) || "tram".equals(k) && "yes".equals(v) || "railway".equals(k) && "tram".equals(v)) {
+                        if ("train".equals(k) && "yes".equals(v) || "tram".equals(k) && "yes".equals(v) || "railway".equals(k)) {
                             rejectedWay = true;
                         }
                     }
@@ -75,8 +73,8 @@ public class OsmXmlParser {
                         String fromId = currentWayNodes.get(i);
                         String toId = currentWayNodes.get(i + 1);
                         graphBuilder.addEdge(fromId, toId, streetwidth);
-                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(fromId).orElseThrow(), graphBuilder.getNode(toId).orElseThrow(), true, StreetType.STREET , streetwidth));
-                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(toId).orElseThrow(), graphBuilder.getNode(fromId).orElseThrow(), true, StreetType.STREET , streetwidth));
+                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(fromId).orElseThrow(), graphBuilder.getNode(toId).orElseThrow(), true, StreetCategory.STREET , streetwidth));
+                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(toId).orElseThrow(), graphBuilder.getNode(fromId).orElseThrow(), true, StreetCategory.STREET , streetwidth));
                     }
                 }
             }
