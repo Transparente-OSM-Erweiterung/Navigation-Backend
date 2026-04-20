@@ -2,11 +2,9 @@ package de.dhbwka.navigation.extension;
 
 import de.dhbwka.navigation.graph.Graph;
 import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
-import de.dhbwka.navigation.graph.edge.Edge;
 import de.dhbwka.navigation.graph.edge.GeoEdge;
 import de.dhbwka.navigation.graph.edge.WidthedEdge;
 import de.dhbwka.navigation.graph.node.GeoNode;
-import de.dhbwka.navigation.graph.node.Node;
 import de.dhbwka.navigation.math.Cramer2Solve;
 import de.dhbwka.navigation.math.Mat2;
 import de.dhbwka.navigation.math.Vec2;
@@ -104,8 +102,8 @@ public class ExtensionGraph<
                 isExtensionId(nodeId)
                 ?getEdgesOfExtensionNode(nodeId)
                 :getEdgesOfBaseNode(nodeId);
-        List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighBouringEdgeList = new ArrayList<>(neighbouringEdges.baseEdges);
-        neighBouringEdgeList.addAll(neighbouringEdges.extensionEdges);
+        List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighBouringEdgeList = new ArrayList<>(neighbouringEdges.baseEdges());
+        neighBouringEdgeList.addAll(neighbouringEdges.extensionEdges());
         return neighBouringEdgeList;
     }
 
@@ -114,20 +112,20 @@ public class ExtensionGraph<
         GeoNode node = graph.getNode(nodeId).orElseThrow();
         Compound<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> compound = new Compound<>(new ArrayList<>(), new ArrayList<>());
 
-        compound.baseEdges.addAll(graph.getEdgesFrom(nodeId));
-        compound.baseEdges.sort(new DegreeComparator<>(0));
+        compound.baseEdges().addAll(graph.getEdgesFrom(nodeId));
+        compound.baseEdges().sort(new DegreeComparator<>(0));
 
-        for (int i = 0; i < compound.baseEdges.size(); i++) {
+        for (int i = 0; i < compound.baseEdges().size(); i++) {
             GeoNode extensionNode = createExtensionNode(
                     nodeId + indexToIdAppender(i),
                     node,
-                    compound.baseEdges.get(i),
-                    compound.baseEdges.get(
-                            (i + 1) % compound.baseEdges.size()
+                    compound.baseEdges().get(i),
+                    compound.baseEdges().get(
+                            (i + 1) % compound.baseEdges().size()
                     )
             );
 
-            compound.extensionEdges.add(
+            compound.extensionEdges().add(
                     new ExtensionEdge<>(
                             node,
                             extensionNode,
@@ -144,27 +142,27 @@ public class ExtensionGraph<
         Compound<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> compound = new Compound<>(new ArrayList<>(), new ArrayList<>());
         GeoNode parent = graph.getNode(nodeId.replaceAll("[^0-9]", "")).orElseThrow();
         int offset = idAppenderToIndex(nodeId.replaceAll("[0-9]+", ""));
-        compound.extensionEdges.add(new ExtensionEdge<>(node, parent, ExtensionEdgeCategory.EXTENSION_TO_BASE));
+        compound.extensionEdges().add(new ExtensionEdge<>(node, parent, ExtensionEdgeCategory.EXTENSION_TO_BASE));
 
         Compound<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> parentNeighbors = getEdgesOfBaseNode(parent.getId());
 
-        if(parentNeighbors.extensionEdges.size() > 1) {
-            for (int i = 0; i < parentNeighbors.extensionEdges.size(); i++) {
-                if(parentNeighbors.extensionEdges.get(i).getDestination().getId().equals(nodeId)){
-                    GeoNode left = parentNeighbors.extensionEdges.get((i - 1 + parentNeighbors.extensionEdges.size()) % parentNeighbors.extensionEdges.size()).getDestination();
-                    GeoNode right = parentNeighbors.extensionEdges.get((i + 1) % parentNeighbors.extensionEdges.size()).getDestination();
-                    compound.extensionEdges.add(
+        if(parentNeighbors.extensionEdges().size() > 1) {
+            for (int i = 0; i < parentNeighbors.extensionEdges().size(); i++) {
+                if(parentNeighbors.extensionEdges().get(i).getDestination().getId().equals(nodeId)){
+                    GeoNode left = parentNeighbors.extensionEdges().get((i - 1 + parentNeighbors.extensionEdges().size()) % parentNeighbors.extensionEdges().size()).getDestination();
+                    GeoNode right = parentNeighbors.extensionEdges().get((i + 1) % parentNeighbors.extensionEdges().size()).getDestination();
+                    compound.extensionEdges().add(
                             new ExtensionEdge<>(
                                     node,
                                     left,
                                     ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_CROSSING_STREET
                             ));
                     if (left != right) {
-                        compound.extensionEdges.add(
+                        compound.extensionEdges().add(
                                 new ExtensionEdge<>(
                                         node,
-                                        parentNeighbors.extensionEdges.get(
-                                                (i + 1) % parentNeighbors.extensionEdges.size()
+                                        parentNeighbors.extensionEdges().get(
+                                                (i + 1) % parentNeighbors.extensionEdges().size()
                                         ).getDestination(),
                                         ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_CROSSING_STREET
                                 ));
@@ -175,8 +173,8 @@ public class ExtensionGraph<
         }
 
         List<GeoEdge<? extends GeoNode>>  matchingBaseNeighboursOfParent = List.of(
-                parentNeighbors.baseEdges.get(offset),
-                parentNeighbors.baseEdges.get((offset + 1) % parentNeighbors.baseEdges.size())
+                parentNeighbors.baseEdges().get(offset),
+                parentNeighbors.baseEdges().get((offset + 1) % parentNeighbors.baseEdges().size())
         ); // Double entries are intended as single base edged ExtensionNeighbours also have 2 ExtensionNeighbors, in this case twice from the same base node.
 
         // Special Case of 2 Nodes Connected to just each other but nowhere else where Correct would be only 1 extension neighbor but calculated are being 2 times the same neighbor gets ignored here.
@@ -184,14 +182,14 @@ public class ExtensionGraph<
         for (int i = 0; i < matchingBaseNeighboursOfParent.size(); i++) {
             GeoEdge<? extends GeoNode> matchingBaseNeighbourOfParent = matchingBaseNeighboursOfParent.get(i);
             Compound<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighboursAroundMatchingBaseNeighbourOfParent = getEdgesOfBaseNode(matchingBaseNeighbourOfParent.getDestination().getId());
-            for (int j = 0; j < neighboursAroundMatchingBaseNeighbourOfParent.baseEdges.size(); j++) {
-                if (neighboursAroundMatchingBaseNeighbourOfParent.baseEdges.get(j).getDestination().getId().equals(parent.getId())) {
-                    compound.extensionEdges.add(
+            for (int j = 0; j < neighboursAroundMatchingBaseNeighbourOfParent.baseEdges().size(); j++) {
+                if (neighboursAroundMatchingBaseNeighbourOfParent.baseEdges().get(j).getDestination().getId().equals(parent.getId())) {
+                    compound.extensionEdges().add(
                             new ExtensionEdge<>(
                                     node,
-                                    neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges.get(
-                                            (j + i - 1 + neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges.size())
-                                                    % neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges.size()
+                                    neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().get(
+                                            (j + i - 1 + neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().size())
+                                                    % neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().size()
                                     ).getDestination(),
                                     ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_ALONG_STREET
                             ));
@@ -254,30 +252,5 @@ public class ExtensionGraph<
 
     public static<E extends GeoNode> double calcDeg(E origin, E dest) {
         return calcDeg(origin, dest, 0);
-    }
-
-    private record Compound<
-            NodeType extends Node,
-            BaseEdgeType extends Edge<? extends NodeType>,
-            ExtensionEdgeType extends Edge<? extends NodeType>
-        > (
-                List<BaseEdgeType> baseEdges,
-                List<ExtensionEdgeType> extensionEdges
-    ){
-
-    }
-
-    private record DegreeComparator<NodeType extends GeoNode, EdgeType extends GeoEdge<? extends NodeType>>(double offset) implements Comparator<EdgeType> {
-
-        @Override
-        public int compare(EdgeType thisEdge, EdgeType otherEdge) {
-            return Comparator.comparingDouble(
-                    (EdgeType edge) -> calcDeg(
-                            edge.getOrigin(),
-                            edge.getDestination(),
-                            offset
-                    )
-            ).compare(thisEdge, otherEdge);
-        }
     }
 }
