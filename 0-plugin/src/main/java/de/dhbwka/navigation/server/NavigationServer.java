@@ -22,13 +22,11 @@ import java.util.Map;
 public class NavigationServer {
 
     InMemoryGraph<GeoNode, OsmEdge<GeoNode>> graph;
-    PathFinder<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> pathFinder;
 
     public NavigationServer() throws FileNotFoundException, XMLStreamException {
         graph = new InMemoryGraph<>();
         OsmXmlParser parser = new OsmXmlParser(graph);
         parser.parse(new FileInputStream("./run/map.osm"));
-        pathFinder = new AStarPathFinder<>(new ExtensionGraph<>(graph), new HarversineEdgeScorer<>(), new HaversineHeuristic<>());
     }
 
     public void start() throws IOException {
@@ -60,6 +58,16 @@ public class NavigationServer {
         String start = parts[0];
         String end = parts[1];
 
+        PathFinder<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> pathFinder =
+                new AStarPathFinder<>(
+                        new ExtensionEdgeCategoryFilter<>(
+                                new ExtensionGraph<>(graph),
+                                start,
+                                end
+                        ),
+                        new HaversineEdgeScorer<>(),
+                        new HaversineHeuristic<>()
+                );
         List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
         String responseJson = String.format("""
                 %s

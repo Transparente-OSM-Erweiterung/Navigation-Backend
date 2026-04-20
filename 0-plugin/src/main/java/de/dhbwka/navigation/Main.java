@@ -16,7 +16,7 @@ public class Main {
         InMemoryGraph<GeoNode, OsmEdge<GeoNode>> graph = new InMemoryGraph<>();
         OsmXmlParser parser = new OsmXmlParser(graph);
         parser.parse(new FileInputStream("./run/map.osm"));
-        AStarPathFinder<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> pathFinder = new AStarPathFinder<>(new ExtensionGraph<>(graph), new HarversineEdgeScorer<>(), new HaversineHeuristic<>());
+        AStarPathFinder<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> pathFinder = new AStarPathFinder<>(new ExtensionGraph<>(graph), new HaversineEdgeScorer<>(), new HaversineHeuristic<>());
         List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> path = pathFinder.findPath(graph.getNode("21533398").orElseThrow(), graph.getNode("15105688").orElseThrow());
         System.out.println(path.stream().map(e -> e.getOrigin().getId()).toList());
         System.out.println(path.stream().map(e -> String.format(Locale.US, "[%.5f,%.5f]", e.getOrigin().getLongitude(), e.getOrigin().getLatitude())).toList());

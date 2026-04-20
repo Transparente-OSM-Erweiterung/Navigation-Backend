@@ -1,6 +1,6 @@
 package de.dhbwka.navigation;
 
-public class HarversineEdgeScorer<
+public class HaversineEdgeScorer<
         NodeType extends GeoNode,
         EdgeType extends GeoEdge<? extends NodeType>
     > implements EdgeScorer<NodeType, EdgeType> {
