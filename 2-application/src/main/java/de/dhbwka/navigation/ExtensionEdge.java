@@ -7,29 +7,18 @@ public class ExtensionEdge<
     private final NodeType origin;
     private final NodeType destination;
 
-    private final boolean directed;
     private final ExtensionEdgeCategory category;
 
-    public ExtensionEdge(NodeType origin, NodeType destination, boolean directed, ExtensionEdgeCategory category) {
+    public ExtensionEdge(NodeType origin, NodeType destination, ExtensionEdgeCategory category) {
         this.origin = origin;
         this.destination = destination;
-        this.directed = directed;
         this.category = category;
     }
 
-    private static final ExtensionEdgeCategory TYPE_DEFAULT = ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_ALONG_STREET;
-    private static final boolean DIRECTED_DEFAULT = true;
-
-    public ExtensionEdge(NodeType origin, NodeType destination, boolean directed) {
-        this(origin, destination, directed, TYPE_DEFAULT);
-    }
-
-    public ExtensionEdge(NodeType origin, NodeType destination, ExtensionEdgeCategory category) {
-        this(origin, destination, DIRECTED_DEFAULT, category);
-    }
+    private static final ExtensionEdgeCategory CATEGORY_DEFAULT = ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_ALONG_STREET;
 
     public ExtensionEdge(NodeType origin, NodeType destination) {
-        this(origin, destination, DIRECTED_DEFAULT, TYPE_DEFAULT);
+        this(origin, destination, CATEGORY_DEFAULT);
     }
 
     @Override
@@ -40,11 +29,6 @@ public class ExtensionEdge<
     @Override
     public NodeType getDestination() {
         return destination;
-    }
-
-    @Override
-    public boolean isDirected() {
-        return directed;
     }
 
     @Override

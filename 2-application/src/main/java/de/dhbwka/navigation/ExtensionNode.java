@@ -1,8 +1,8 @@
 package de.dhbwka.navigation;
 
 public class ExtensionNode implements GeoNode{
-    private double latitude;
-    private double longitude;
+    private final double latitude;
+    private final double longitude;
     private final String id;
 
     public ExtensionNode(String id, double latitude, double longitude) {

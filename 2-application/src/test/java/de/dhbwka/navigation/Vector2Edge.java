@@ -6,12 +6,9 @@ public class Vector2Edge implements Edge<Vector2Node>{
 
     private final Vector2Node destination;
 
-    private final boolean directed;
-
-    public Vector2Edge(Vector2Node origin, Vector2Node destination, boolean directed) {
+    public Vector2Edge(Vector2Node origin, Vector2Node destination) {
         this.origin = origin;
         this.destination = destination;
-        this.directed = directed;
     }
 
     @Override
@@ -22,10 +19,5 @@ public class Vector2Edge implements Edge<Vector2Node>{
     @Override
     public Vector2Node getDestination() {
         return destination;
-    }
-
-    @Override
-    public boolean isDirected() {
-        return directed;
     }
 }

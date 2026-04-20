@@ -9,13 +9,5 @@ public interface Graph<
     > {
     Optional<NodeType> getNode(String id);
 
-    @Deprecated
-    Collection<NodeType> getNeighbors(NodeType node);
-
-    /**
-     * @return an Edge that is guaranteed to have the node as its origin parameter.
-     */
-    //Collection<EdgeType> getEdgesFrom(NodeType node);
-
     Collection<EdgeType> getEdgesFrom(String nodeId);
 }

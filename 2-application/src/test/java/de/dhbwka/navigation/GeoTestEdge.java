@@ -20,11 +20,6 @@ public class GeoTestEdge implements CategorizedGeoEdge<GeoTestNode, ExtensionEdg
     }
 
     @Override
-    public boolean isDirected() {
-        return false;
-    }
-
-    @Override
     public double getWidth() {
         return 1;
     }

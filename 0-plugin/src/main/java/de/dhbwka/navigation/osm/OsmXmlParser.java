@@ -23,8 +23,6 @@ public class OsmXmlParser {
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLStreamReader reader = factory.createXMLStreamReader(inputStream);
 
-        Map<String, OsmNode> nodes = new HashMap<>();
-
         List<String> currentWayNodes = new ArrayList<>();
 
         double streetwidth = DEFAULT_WIDTH;
@@ -42,7 +40,6 @@ public class OsmXmlParser {
                         double lat = Double.parseDouble(reader.getAttributeValue(null, "lat"));
                         double lon = Double.parseDouble(reader.getAttributeValue(null, "lon"));
                         OsmNode node = new OsmNode(id, lat, lon);
-                        nodes.put(id, node);
                         graphBuilder.addNode(node);
                     }
                     case "way" -> {
@@ -72,9 +69,8 @@ public class OsmXmlParser {
                     for (int i = 0; i < currentWayNodes.size() - 1; i++) {
                         String fromId = currentWayNodes.get(i);
                         String toId = currentWayNodes.get(i + 1);
-                        graphBuilder.addEdge(fromId, toId, streetwidth);
-                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(fromId).orElseThrow(), graphBuilder.getNode(toId).orElseThrow(), true, StreetCategory.STREET , streetwidth));
-                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(toId).orElseThrow(), graphBuilder.getNode(fromId).orElseThrow(), true, StreetCategory.STREET , streetwidth));
+                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(fromId).orElseThrow(), graphBuilder.getNode(toId).orElseThrow(), StreetCategory.STREET , streetwidth));
+                        graphBuilder.addEdge(new OsmEdge<>(graphBuilder.getNode(toId).orElseThrow(), graphBuilder.getNode(fromId).orElseThrow(), StreetCategory.STREET , streetwidth));
                     }
                 }
             }

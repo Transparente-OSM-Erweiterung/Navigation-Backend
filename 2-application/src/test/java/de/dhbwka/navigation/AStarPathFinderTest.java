@@ -30,7 +30,7 @@ class AStarPathFinderTest {
         ).forEach((from, to) -> {
             Vector2Node n1 = graph.getNode(from).orElseThrow();
             Vector2Node n2 = graph.getNode(to).orElseThrow();
-            graph.addEdge(new Vector2Edge(n1, n2, false));
+            graph.addEdge(new Vector2Edge(n1, n2));
         });
     }
 
