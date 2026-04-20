@@ -41,11 +41,4 @@ class AStarPathFinderTest {
         String[] pathString = path.stream().map(e->e.getDestination().getId()).toArray(String[]::new);
         assertArrayEquals(new String[]{"B", "D"}, pathString);
     }
-
-    /*
-    @Test
-    void gettingEdgeCorrectly() {
-        graph.getEdgesFrom(graph.getNode("A").orElseThrow());
-        assertEquals();
-    }*/
 }
