@@ -23,9 +23,9 @@ public class AStarPathFinder<
     }
 
     @Override
-    public List<EdgeType> findPath(NodeType start, NodeType destination) {
-        Objects.requireNonNull(start);
-        Objects.requireNonNull(destination);
+    public List<EdgeType> findPath(String startId, String destinationId) {
+        NodeType start = graph.getNode(startId).orElseThrow(NullPointerException::new);
+        NodeType destination = graph.getNode(destinationId).orElseThrow(NullPointerException::new);
         // Warteschlange an Nodes für über die Iteriert werden soll, geordnet nach Priorität.
         Queue<PathAwareNode<NodeType, EdgeType>> openList = new PriorityQueue<>();
         // Speicherung von PathAwareNodes die Kontextinformationen über den Pfad besitzen.

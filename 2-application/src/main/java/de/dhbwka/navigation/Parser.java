@@ -1,10 +1,8 @@
 package de.dhbwka.navigation;
 
-import java.util.List;
-
-public interface PathFinder<
+public interface Parser<
         NodeType extends Node,
         EdgeType extends Edge<? extends NodeType>
     > {
-    List<EdgeType> findPath(String startId, String destinationId);
+    void parse(GraphBuilder<? super NodeType, ? super EdgeType> builder);
 }

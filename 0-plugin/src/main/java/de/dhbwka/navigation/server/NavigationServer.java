@@ -3,12 +3,8 @@ package de.dhbwka.navigation.server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import de.dhbwka.navigation.*;
-import de.dhbwka.navigation.osm.OsmEdge;
-import de.dhbwka.navigation.osm.OsmXmlParser;
+import de.dhbwka.navigation.services.NavigationService;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -21,12 +17,10 @@ import java.util.Map;
 
 public class NavigationServer {
 
-    InMemoryGraph<GeoNode, OsmEdge<GeoNode>> graph;
+    private final NavigationService service;
 
-    public NavigationServer() throws FileNotFoundException, XMLStreamException {
-        graph = new InMemoryGraph<>();
-        OsmXmlParser parser = new OsmXmlParser(graph);
-        parser.parse(new FileInputStream("./run/map.osm"));
+    public NavigationServer(Parser<? extends GeoNode, ? extends CategorizedWidthedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> parser) {
+        service = new NavigationService(parser);
     }
 
     public void start() throws IOException {
@@ -58,17 +52,8 @@ public class NavigationServer {
         String start = parts[0];
         String end = parts[1];
 
-        PathFinder<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> pathFinder =
-                new AStarPathFinder<>(
-                        new ExtensionEdgeCategoryFilter<>(
-                                new ExtensionGraph<>(graph),
-                                start,
-                                end
-                        ),
-                        new HaversineEdgeScorer<>(),
-                        new HaversineHeuristic<>()
-                );
-        List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> path = pathFinder.findPath(graph.getNode(start).orElseThrow(), graph.getNode(end).orElseThrow());
+
+        List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> path = service.calculateRoute(start, end);
         String responseJson = String.format("""
                 %s
                 """, path.stream().map(n -> "[" + n.getOrigin().getLongitude() + ", " + n.getOrigin().getLatitude() + "]").toList()); //TODO

@@ -37,11 +37,11 @@ class AStarPathFinderTest {
     @Test
     void findPathShouldReturnCorrectSequenceOfNodes() {
         // Arrange
-        Vector2Node start = graph.getNode("A").orElseThrow();
-        Vector2Node target = graph.getNode("D").orElseThrow();
+        String startId = "A";
+        String  targetId = "D";
 
         // Act
-        List<Edge<Vector2Node>> path = pathFinder.findPath(start, target);
+        List<Edge<Vector2Node>> path = pathFinder.findPath(startId, targetId);
 
         // Assert
         assertThat(path)

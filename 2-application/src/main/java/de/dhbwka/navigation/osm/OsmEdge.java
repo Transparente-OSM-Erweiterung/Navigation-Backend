@@ -4,8 +4,7 @@ import de.dhbwka.navigation.*;
 
 
 public class OsmEdge<NodeType extends GeoNode> implements
-        CategorizedGeoEdge<NodeType, ExtensionEdgeCategory>,
-        WidthedEdge<NodeType>
+        CategorizedWidthedGeoEdge<NodeType, ExtensionEdgeCategory>
 {
 
     private final NodeType origin;
