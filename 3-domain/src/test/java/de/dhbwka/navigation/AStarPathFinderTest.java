@@ -9,6 +9,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AStarPathFinderTest {
+
     private static final InMemoryGraph<Vector2Node, Edge<Vector2Node>> graph = new InMemoryGraph<>();
     private static final PathFinder<Vector2Node, Edge<Vector2Node>> pathFinder =
             new AStarPathFinder<>(graph, new EuclideanEdgeScorer<>(), new EuclideanHeuristic<>());
