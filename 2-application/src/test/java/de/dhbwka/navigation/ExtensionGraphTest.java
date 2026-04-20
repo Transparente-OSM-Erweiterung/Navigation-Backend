@@ -46,7 +46,6 @@ class ExtensionGraphTest {
 
         var extGraph = createSetup(main, neighbors);
 
-        // Wir fragen die Kanten eines virtuellen Knotens ab
         assertThat(extGraph.getEdgesFrom("0a"))
                 .extracting(e -> e.getDestination().getId())
                 .containsExactlyInAnyOrder("0", "0b", "0d", "1a", "2a");
@@ -72,14 +71,26 @@ class ExtensionGraphTest {
 
     @ParameterizedTest(name = "Angle of Node {0} ({1}|{2}) should be {3}°")
     @CsvSource({
-        // Normierte Distanzen
-        "1,  0,  1,   0", "2,  1,  1,  45", "3,  1,  0,  90", "4,  1, -1, 135",
-        "5,  0, -1, 180", "6, -1, -1, 225", "7, -1,  0, 270", "8, -1,  1, 315",
-        // Nicht-normierte Distanzen (skaliert)
-        "1s, 0,  2,   0", "2s, 2,  2,  45", "3s, 2,  0,  90", "4s, 2, -2, 135",
-        "5s, 0, -2, 180", "6s, -2, -2, 225", "7s, -2,  0, 270", "8s, -2,  2, 315"
+            // normalized distances
+            "1,  0,  1,   0",
+            "2,  1,  1,  45",
+            "3,  1,  0,  90",
+            "4,  1, -1, 135",
+            "5,  0, -1, 180",
+            "6, -1, -1, 225",
+            "7, -1,  0, 270",
+            "8, -1,  1, 315",
+            // non normalized distances
+            "1s, 0,  2,   0",
+            "2s, 2,  2,  45",
+            "3s, 2,  0,  90",
+            "4s, 2, -2, 135",
+            "5s, 0, -2, 180",
+            "6s, -2, -2, 225",
+            "7s, -2,  0, 270",
+            "8s, -2,  2, 315"
     })
-    void calcDeg_ShouldReturnCorrectDegrees(String id, double x, double y, double expectedDeg) {
+    void calcDegShouldReturnCorrectDegrees(String id, double x, double y, double expectedDeg) {
         GeoNode origin = new GeoTestNode("0", 0, 0);
         GeoNode target = new GeoTestNode(id, x, y);
 
