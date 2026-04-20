@@ -5,12 +5,13 @@ import java.util.function.Function;
 
 public class ExtensionGraph<
         InputNodeType extends GeoNode,
-        InputEdgeType extends CategorizedGeoEdge<InputNodeType, ExtensionEdgeCategory>
+        InputEdgeType extends CategorizedGeoEdge<? extends InputNodeType, ExtensionEdgeCategory>
+                & WidthedEdge<? extends InputNodeType>
     > implements Graph<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> {
-    private final GraphWithWidth<? extends InputNodeType, ? extends InputEdgeType> graph;
+    private final Graph<? extends InputNodeType, ? extends InputEdgeType> graph;
 
 
-    public ExtensionGraph(GraphWithWidth<
+    public ExtensionGraph(Graph<
             ? extends InputNodeType,
             ? extends InputEdgeType
         > graph) {
@@ -40,25 +41,25 @@ public class ExtensionGraph<
                 return Optional.empty();
             }
 
-            GeoNode neighbor1 = sortedEdges.get(index).getDestination();
-            GeoNode neighbor2 = sortedEdges.get((index + 1) % sortedEdges.size()).getDestination();
+            InputEdgeType edge1 = sortedEdges.get(index);
+            InputEdgeType edge2 = sortedEdges.get((index + 1) % sortedEdges.size());
 
-            return Optional.of(createExtensionNode(nodeId, parent, neighbor1, neighbor2));
+            return Optional.of(createExtensionNode(nodeId, parent, edge1, edge2));
         });
     }
 
-    private ExtensionNode createExtensionNode(String id, GeoNode center, GeoNode n1, GeoNode n2) {
+    private ExtensionNode createExtensionNode(String id, GeoNode center, WidthedEdge<? extends GeoNode> e1, WidthedEdge<? extends GeoNode> e2) {
         Vec2 ref = center.toVec2();
         Vec2 localOrigin = Projection.projectToLocal(ref, ref);
 
-        Vec2 loc1 = Projection.projectToLocal(n1.toVec2(), ref);
-        Vec2 loc2 = Projection.projectToLocal(n2.toVec2(), ref);
+        Vec2 loc1 = Projection.projectToLocal(e1.getDestination().toVec2(), ref);
+        Vec2 loc2 = Projection.projectToLocal(e2.getDestination().toVec2(), ref);
 
         Vec2 u1 = loc1.add(localOrigin.negated()).normalized();
         Vec2 u2 = loc2.add(localOrigin.negated()).normalized();
 
-        double w1 = graph.getWidth(center.getId(), n1.getId());
-        double w2 = graph.getWidth(center.getId(), n2.getId());
+        double w1 = e1.getWidth();
+        double w2 = e2.getWidth();
 
         Vec2 p1 = localOrigin.add(u1.rot90right().scale(0.5 * w1));
         Vec2 p2 = localOrigin.add(u2.rot90left().scale(0.5 * w2));
@@ -99,7 +100,7 @@ public class ExtensionGraph<
 
     @Override
     public Collection<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> getEdgesFrom(String nodeId) {
-        Compound2<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighbouringEdges =
+        Compound2<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighbouringEdges =
                 isExtensionId(nodeId)
                 ?getEdgesOfExtensionNode(nodeId)
                 :getEdgesOfBaseNode(nodeId);
@@ -108,10 +109,10 @@ public class ExtensionGraph<
         return neighBouringEdgeList;
     }
 
-    private Compound2<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> getEdgesOfBaseNode(String nodeId) {
+    private Compound2<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> getEdgesOfBaseNode(String nodeId) {
         if(isExtensionId(nodeId)) throw new IllegalArgumentException();
         GeoNode node = graph.getNode(nodeId).orElseThrow();
-        Compound2<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> compound = new Compound2<>(new ArrayList<>(), new ArrayList<>());
+        Compound2<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> compound = new Compound2<>(new ArrayList<>(), new ArrayList<>());
 
         compound.baseEdges.addAll(graph.getEdgesFrom(nodeId));
         compound.baseEdges.sort(new DegreeComparator2<>(0));
@@ -120,10 +121,10 @@ public class ExtensionGraph<
             GeoNode extensionNode = createExtensionNode(
                     nodeId + indexToIdAppender(i),
                     node,
-                    compound.baseEdges.get(i).getDestination(),
+                    compound.baseEdges.get(i),
                     compound.baseEdges.get(
                             (i + 1) % compound.baseEdges.size()
-                    ).getDestination()
+                    )
             );
 
             compound.extensionEdges.add(
@@ -137,15 +138,15 @@ public class ExtensionGraph<
         return compound;
     }
 
-    private Compound2<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> getEdgesOfExtensionNode(String nodeId) {
+    private Compound2<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> getEdgesOfExtensionNode(String nodeId) {
         if(!isExtensionId(nodeId)) throw new IllegalArgumentException();
         GeoNode node = getExtensionNode(nodeId).orElseThrow();
-        Compound2<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> compound = new Compound2<>(new ArrayList<>(), new ArrayList<>());
+        Compound2<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> compound = new Compound2<>(new ArrayList<>(), new ArrayList<>());
         GeoNode parent = graph.getNode(nodeId.replaceAll("[^0-9]", "")).orElseThrow();
         int offset = idAppenderToIndex(nodeId.replaceAll("[0-9]+", ""));
-        compound.baseEdges.add(new ExtensionEdge<>(node, parent, ExtensionEdgeCategory.EXTENSION_TO_BASE));
+        compound.extensionEdges.add(new ExtensionEdge<>(node, parent, ExtensionEdgeCategory.EXTENSION_TO_BASE));
 
-        Compound2<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> parentNeighbors = getEdgesOfBaseNode(parent.getId());
+        Compound2<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> parentNeighbors = getEdgesOfBaseNode(parent.getId());
 
         if(parentNeighbors.extensionEdges.size() > 1) {
             for (int i = 0; i < parentNeighbors.extensionEdges.size(); i++) {
@@ -182,7 +183,7 @@ public class ExtensionGraph<
 
         for (int i = 0; i < matchingBaseNeighboursOfParent.size(); i++) {
             GeoEdge<? extends GeoNode> matchingBaseNeighbourOfParent = matchingBaseNeighboursOfParent.get(i);
-            Compound2<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighboursAroundMatchingBaseNeighbourOfParent = getEdgesOfBaseNode(matchingBaseNeighbourOfParent.getDestination().getId());
+            Compound2<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighboursAroundMatchingBaseNeighbourOfParent = getEdgesOfBaseNode(matchingBaseNeighbourOfParent.getDestination().getId());
             for (int j = 0; j < neighboursAroundMatchingBaseNeighbourOfParent.baseEdges.size(); j++) {
                 if (neighboursAroundMatchingBaseNeighbourOfParent.baseEdges.get(j).getDestination().getId().equals(parent.getId())) {
                     compound.extensionEdges.add(
@@ -227,18 +228,32 @@ public class ExtensionGraph<
             Vec2 normal1 = u1.rot90right();
             Vec2 normal2 = u2.rot90left();
 
-            Vec2 p1 = localOrigin.add(normal1.scale(
-                    0.5 * graph.getWidth(
-                            node.getId(),
-                            compound.baseNodes.get(i).getId()
+            int finalI = i;
+            Vec2 p1 = localOrigin.add(
+                    normal1.scale(
+                            0.5 * graph.getEdgesFrom(node.getId())
+                                    .stream()
+                                    .filter(
+                                            (InputEdgeType e) -> compound.baseNodes.get(finalI).getId().equals(e.getDestination().getId())
+                                    )
+                                    .findAny()
+                                    .orElseThrow()
+                                    .getWidth()
                     )
-            ));
-            Vec2 p2 = localOrigin.add(normal2.scale(
-                    0.5 * graph.getWidth(
-                            node.getId(),
-                            compound.baseNodes.get((i + 1) % compound.baseNodes.size()).getId()
+            );
+
+             Vec2 p2 = localOrigin.add(
+                    normal2.scale(
+                            0.5 * graph.getEdgesFrom(node.getId())
+                                    .stream()
+                                    .filter(
+                                            (InputEdgeType e) -> compound.baseNodes.get((finalI + 1) % compound.baseNodes.size()).getId().equals(e.getDestination().getId())
+                                    )
+                                    .findAny()
+                                    .orElseThrow()
+                                    .getWidth()
                     )
-            ));
+            );
 
             // g: point1 + u1 * s
             // f: point2 + u2 * t
@@ -380,7 +395,16 @@ public class ExtensionGraph<
     @Deprecated
     private record Compound<E extends GeoNode> (List<E> baseNodes, List<E> extenesionNodes){}
 
-    private record Compound2<NodeType extends Node, EdgeType extends Edge<? extends NodeType>> (List<EdgeType> baseEdges, List<EdgeType> extensionEdges){}
+    private record Compound2<
+            NodeType extends Node,
+            BaseEdgeType extends Edge<? extends NodeType>,
+            ExtensionEdgeType extends Edge<? extends NodeType>
+        > (
+                List<BaseEdgeType> baseEdges,
+                List<ExtensionEdgeType> extensionEdges
+    ){
+
+    }
 
     @Deprecated
     private record DegreeComparator<NodeType extends GeoNode>(NodeType origin, double offset) implements Comparator<NodeType> {

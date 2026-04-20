@@ -3,7 +3,10 @@ package de.dhbwka.navigation.osm;
 import de.dhbwka.navigation.*;
 
 
-public class OsmEdge<NodeType extends GeoNode> implements CategorizedGeoEdge<NodeType, ExtensionEdgeCategory> {
+public class OsmEdge<NodeType extends GeoNode> implements
+        CategorizedGeoEdge<NodeType, ExtensionEdgeCategory>,
+        WidthedEdge<NodeType>
+{
 
     private final NodeType origin;
     private final NodeType destination;
@@ -94,6 +97,7 @@ public class OsmEdge<NodeType extends GeoNode> implements CategorizedGeoEdge<Nod
         return type;
     }
 
+    @Override
     public double getWidth() {
         return width;
     }
