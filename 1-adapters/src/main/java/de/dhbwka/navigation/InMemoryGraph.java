@@ -2,7 +2,7 @@ package de.dhbwka.navigation;
 
 import java.util.*;
 
-public class InMemoryGraph<NodeType extends Node, EdgeType extends Edge<? extends NodeType>> implements GraphWithWidth<NodeType, EdgeType>, GraphBuilder<NodeType, EdgeType> {
+public class InMemoryGraph<NodeType extends Node, EdgeType extends Edge<? extends NodeType>> implements Graph<NodeType, EdgeType>, GraphBuilder<NodeType, EdgeType> {
 
     private final Map<String, NodeType> nodes = new HashMap<>();
 
@@ -58,11 +58,6 @@ public class InMemoryGraph<NodeType extends Node, EdgeType extends Edge<? extend
         if(bidirectional){
             adjacencyMap.get(toId).add(new NodeWithWidth<>(fromNode, streetwidth));
         }
-    }
-
-    @Override
-    public double getWidth(String fromId, String toId) {
-        return adjacencyMap.get(fromId).stream().filter(nww -> nww.node.getId().equals(toId)).findFirst().orElseThrow().width;
     }
 
     private record NodeWithWidth<T extends Node> (T node, Double width){}
