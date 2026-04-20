@@ -1,7 +1,6 @@
 package de.dhbwka.navigation.parser;
 
-import de.dhbwka.navigation.GraphBuilder;
-import de.dhbwka.navigation.Parser;
+import de.dhbwka.navigation.graph.GraphBuilder;
 import de.dhbwka.navigation.osm.OsmEdge;
 import de.dhbwka.navigation.osm.OsmNode;
 import de.dhbwka.navigation.osm.StreetCategory;

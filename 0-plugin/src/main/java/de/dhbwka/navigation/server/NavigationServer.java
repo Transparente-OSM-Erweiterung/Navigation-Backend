@@ -2,7 +2,11 @@ package de.dhbwka.navigation.server;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import de.dhbwka.navigation.*;
+import de.dhbwka.navigation.extension.ExtensionEdgeCategory;
+import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
+import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
+import de.dhbwka.navigation.graph.node.GeoNode;
+import de.dhbwka.navigation.parser.Parser;
 import de.dhbwka.navigation.services.NavigationService;
 
 import java.io.IOException;

@@ -1,6 +1,8 @@
 package de.dhbwka.navigation.osm;
 
-import de.dhbwka.navigation.*;
+import de.dhbwka.navigation.extension.ExtensionEdgeCategory;
+import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
+import de.dhbwka.navigation.graph.node.GeoNode;
 
 
 public class OsmEdge<NodeType extends GeoNode> implements

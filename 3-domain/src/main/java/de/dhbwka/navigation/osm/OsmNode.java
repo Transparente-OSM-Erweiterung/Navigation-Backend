@@ -1,6 +1,6 @@
 package de.dhbwka.navigation.osm;
 
-import de.dhbwka.navigation.GeoNode;
+import de.dhbwka.navigation.graph.node.GeoNode;
 
 public class OsmNode implements GeoNode {
 
