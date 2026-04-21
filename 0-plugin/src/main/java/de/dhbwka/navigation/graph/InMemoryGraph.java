@@ -9,28 +9,28 @@ public class InMemoryGraph<NodeType extends Node, EdgeType extends Edge<? extend
 
     private final Map<String, NodeType> nodes = new HashMap<>();
 
-    private final Map<String, List<EdgeType>> edgeMap = new HashMap<>();
+    private final Map<String, List<EdgeType>> edges = new HashMap<>();
 
     @Override
     public Optional<NodeType> getNode(String id) {
-        Objects.requireNonNull(id);
         return Optional.ofNullable(nodes.get(id));
     }
 
     @Override
     public Collection<EdgeType> getEdgesFrom(String  nodeId) {
-        return edgeMap.get(nodeId);
+        return edges.getOrDefault(nodeId, Collections.emptyList());
     }
 
     @Override
     public void addNode(NodeType node) {
-        Objects.requireNonNull(node);
-        nodes.putIfAbsent(node.getId(), node);
-        edgeMap.computeIfAbsent(node.getId(), k -> new ArrayList<>());
+        nodes.put(node.getId(), node);
     }
 
     @Override
     public void addEdge(EdgeType edge) {
-        edgeMap.get(edge.getOrigin().getId()).add(edge);
+        edges.computeIfAbsent(
+                edge.getOrigin().getId(),
+                id -> new ArrayList<>()
+        ).add(edge);
     }
 }

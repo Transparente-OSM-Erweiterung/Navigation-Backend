@@ -29,7 +29,7 @@ public class OsmEdge<NodeType extends GeoNode> implements
         this.width = width;
     }
 
-    private static final StreetCategory TYPE_DEFAULT = StreetCategory.STREET;
+    private static final StreetCategory STREET_CATEGORY_DEFAULT = StreetCategory.STREET;
 
     public OsmEdge(
             NodeType origin,
@@ -39,7 +39,7 @@ public class OsmEdge<NodeType extends GeoNode> implements
         this(
                 origin,
                 destination,
-                TYPE_DEFAULT,
+                STREET_CATEGORY_DEFAULT,
                 width
         );
     }

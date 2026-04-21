@@ -30,7 +30,7 @@ public class TestGraph<
     protected void addEdge(EdgeType edge) {
         edges.computeIfAbsent(
                 edge.getOrigin().getId(),
-                k -> new ArrayList<>()
+                id -> new ArrayList<>()
         ).add(edge);
     }
 }

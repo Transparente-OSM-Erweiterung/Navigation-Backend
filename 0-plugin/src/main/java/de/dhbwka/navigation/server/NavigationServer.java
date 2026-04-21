@@ -3,10 +3,10 @@ package de.dhbwka.navigation.server;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import de.dhbwka.navigation.extension.ExtensionEdgeCategory;
+import de.dhbwka.navigation.graph.Graph;
 import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
 import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
 import de.dhbwka.navigation.graph.node.GeoNode;
-import de.dhbwka.navigation.parser.Parser;
 import de.dhbwka.navigation.services.NavigationService;
 
 import java.io.IOException;
@@ -23,8 +23,8 @@ public class NavigationServer {
 
     private final NavigationService service;
 
-    public NavigationServer(Parser<? extends GeoNode, ? extends CategorizedWidthedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> parser) {
-        service = new NavigationService(parser);
+    public NavigationServer(Graph<GeoNode, CategorizedWidthedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> graph) {
+        this.service = new NavigationService(graph);
     }
 
     public void start() throws IOException {

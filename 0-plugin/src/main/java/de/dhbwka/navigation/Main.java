@@ -1,5 +1,9 @@
 package de.dhbwka.navigation;
 
+import de.dhbwka.navigation.extension.ExtensionEdgeCategory;
+import de.dhbwka.navigation.graph.InMemoryGraph;
+import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
+import de.dhbwka.navigation.graph.node.GeoNode;
 import de.dhbwka.navigation.parser.OsmXmlParser;
 import de.dhbwka.navigation.server.NavigationServer;
 
@@ -8,6 +12,11 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        new NavigationServer(new OsmXmlParser(new FileInputStream("./run/map.osm"))).start();
+        InMemoryGraph<
+                GeoNode,
+                CategorizedWidthedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>
+            > graph = new InMemoryGraph<>();
+        new OsmXmlParser(new FileInputStream("./run/map.osm")).parse(graph);
+        new NavigationServer(graph).start();
     }
 }
