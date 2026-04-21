@@ -1,4 +1,4 @@
-package de.dhbwka.navigation.extension;
+package de.dhbwka.navigation.extension.filter;
 
 import de.dhbwka.navigation.graph.edge.EdgeCategory;
 

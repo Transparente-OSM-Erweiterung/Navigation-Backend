@@ -1,8 +1,9 @@
 package de.dhbwka.navigation.services;
 
-import de.dhbwka.navigation.extension.ExtensionEdgeCategory;
-import de.dhbwka.navigation.extension.ExtensionEdgeCategoryFilter;
-import de.dhbwka.navigation.extension.ExtensionGraph;
+import de.dhbwka.navigation.extension.*;
+import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategory;
+import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategoryPredicate;
+import de.dhbwka.navigation.extension.filter.FilteredGraph;
 import de.dhbwka.navigation.graph.Graph;
 import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
 import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
@@ -22,10 +23,9 @@ public class NavigationService {
 
     public List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> calculateRoute(String startId, String destinationId) {
         return new AStarPathFinder<>(
-                new ExtensionEdgeCategoryFilter<>(
+                new FilteredGraph<>(
                         extensionGraph,
-                        startId,
-                        destinationId
+                        new ExtensionEdgeCategoryPredicate<>(startId, destinationId)
                 ),
                 new HaversineEdgeScorer<>(),
                 new HaversineHeuristic<>()

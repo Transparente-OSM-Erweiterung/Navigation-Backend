@@ -1,7 +1,7 @@
 package de.dhbwka.navigation.graph.edge;
 
 import de.dhbwka.navigation.graph.node.GeoTestNode;
-import de.dhbwka.navigation.extension.ExtensionEdgeCategory;
+import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategory;
 
 public class GeoTestEdge implements CategorizedGeoEdge<GeoTestNode, ExtensionEdgeCategory>, WidthedEdge<GeoTestNode> {
     final GeoTestNode origin;

@@ -1,5 +1,6 @@
 package de.dhbwka.navigation.extension;
 
+import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategory;
 import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
 import de.dhbwka.navigation.graph.node.GeoNode;
 
