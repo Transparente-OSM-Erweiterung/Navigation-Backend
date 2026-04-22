@@ -6,7 +6,7 @@ import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategoryPredicate;
 import de.dhbwka.navigation.extension.filter.FilteredGraph;
 import de.dhbwka.navigation.graph.Graph;
 import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
-import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
+import de.dhbwka.navigation.graph.edge.CategorizedWidthedSidewalkClassifiedGeoEdge;
 import de.dhbwka.navigation.graph.node.GeoNode;
 import de.dhbwka.navigation.pathfinding.AStarPathFinder;
 import de.dhbwka.navigation.pathfinding.HaversineEdgeScorer;
@@ -17,7 +17,7 @@ import java.util.List;
 public class NavigationService {
     private final Graph<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> extensionGraph;
 
-    public NavigationService(Graph<GeoNode, CategorizedWidthedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> graph) {
+    public NavigationService(Graph<GeoNode, CategorizedWidthedSidewalkClassifiedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> graph) {
         this.extensionGraph = new ExtensionGraph<>(graph);
     }
 

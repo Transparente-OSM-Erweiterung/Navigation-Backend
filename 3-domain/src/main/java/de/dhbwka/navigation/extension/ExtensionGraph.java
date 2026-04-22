@@ -3,7 +3,7 @@ package de.dhbwka.navigation.extension;
 import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategory;
 import de.dhbwka.navigation.graph.Graph;
 import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
-import de.dhbwka.navigation.graph.edge.GeoEdge;
+import de.dhbwka.navigation.graph.edge.SideWalkClassified;
 import de.dhbwka.navigation.graph.edge.WidthedEdge;
 import de.dhbwka.navigation.graph.node.GeoNode;
 import de.dhbwka.navigation.math.Cramer2Solve;
@@ -17,16 +17,17 @@ public class ExtensionGraph<
         InputNodeType extends GeoNode,
         InputEdgeType extends CategorizedGeoEdge<? extends InputNodeType, ExtensionEdgeCategory>
                 & WidthedEdge<? extends InputNodeType>
+                & SideWalkClassified
     > implements Graph<GeoNode, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> {
     private final Graph<? extends InputNodeType, ? extends InputEdgeType> graph;
 
 
-    public ExtensionGraph(Graph<
-            ? extends InputNodeType,
-            ? extends InputEdgeType
-        > graph) {
+    public ExtensionGraph(
+            Graph<? extends InputNodeType, ? extends InputEdgeType> graph
+    ) {
         this.graph = graph;
     }
+
 
 
     @Override
@@ -173,7 +174,7 @@ public class ExtensionGraph<
             }
         }
 
-        List<GeoEdge<? extends GeoNode>>  matchingBaseNeighboursOfParent = List.of(
+        List<InputEdgeType>  matchingBaseNeighboursOfParent = List.of(
                 parentNeighbors.baseEdges().get(offset),
                 parentNeighbors.baseEdges().get((offset + 1) % parentNeighbors.baseEdges().size())
         ); // Double entries are intended as single base edged ExtensionNeighbours also have 2 ExtensionNeighbors, in this case twice from the same base node.
@@ -181,19 +182,25 @@ public class ExtensionGraph<
         // Special Case of 2 Nodes Connected to just each other but nowhere else where Correct would be only 1 extension neighbor but calculated are being 2 times the same neighbor gets ignored here.
 
         for (int i = 0; i < matchingBaseNeighboursOfParent.size(); i++) {
-            GeoEdge<? extends GeoNode> matchingBaseNeighbourOfParent = matchingBaseNeighboursOfParent.get(i);
+            InputEdgeType matchingBaseNeighbourOfParent = matchingBaseNeighboursOfParent.get(i);
             Compound<GeoNode, InputEdgeType, CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> neighboursAroundMatchingBaseNeighbourOfParent = getEdgesOfBaseNode(matchingBaseNeighbourOfParent.getDestination().getId());
             for (int j = 0; j < neighboursAroundMatchingBaseNeighbourOfParent.baseEdges().size(); j++) {
                 if (neighboursAroundMatchingBaseNeighbourOfParent.baseEdges().get(j).getDestination().getId().equals(parent.getId())) {
-                    compound.extensionEdges().add(
-                            new ExtensionEdge<>(
-                                    node,
-                                    neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().get(
-                                            (j + i - 1 + neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().size())
-                                                    % neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().size()
-                                    ).getDestination(),
-                                    ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_ALONG_STREET
-                            ));
+                    if (
+                            i==0
+                            ?matchingBaseNeighbourOfParent.hasSideWalkLeft()
+                            :matchingBaseNeighbourOfParent.hasSideWalkRight()
+                    ) {
+                        compound.extensionEdges().add(
+                                new ExtensionEdge<>(
+                                        node,
+                                        neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().get(
+                                                (j + i - 1 + neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().size())
+                                                        % neighboursAroundMatchingBaseNeighbourOfParent.extensionEdges().size()
+                                        ).getDestination(),
+                                        ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_ALONG_STREET
+                                ));
+                    }
                 }
             }
         }

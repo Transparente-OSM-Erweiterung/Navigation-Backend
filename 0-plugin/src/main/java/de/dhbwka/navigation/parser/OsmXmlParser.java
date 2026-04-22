@@ -36,6 +36,9 @@ public class OsmXmlParser implements Parser<OsmNode, OsmEdge<OsmNode>> {
 
             double streetwidth = DEFAULT_WIDTH;
             boolean rejectedWay = false;
+            boolean sideWalkLeft = true;
+            boolean sideWalkRight = true;
+            boolean isStreet = false;
 
             while (reader.hasNext()) {
                 int event = reader.next();
@@ -56,6 +59,9 @@ public class OsmXmlParser implements Parser<OsmNode, OsmEdge<OsmNode>> {
                             currentWayNodes.clear();
                             streetwidth = DEFAULT_WIDTH;
                             rejectedWay = false;
+                            sideWalkLeft = true;
+                            sideWalkRight = true;
+                            isStreet = false;
                         }
                         case "nd" -> {
                             String ref = reader.getAttributeValue(null, "ref");
@@ -64,23 +70,77 @@ public class OsmXmlParser implements Parser<OsmNode, OsmEdge<OsmNode>> {
                         case "tag" -> {
                             String k = reader.getAttributeValue(null, "k");
                             String v = reader.getAttributeValue(null, "v");
+                            if (k.equals("highway")){
+                                isStreet = true;
+                            }
                             if ("width".equals(k) || "maxwidth".equals(k) || "est_width".equals(k)) {
-                                streetwidth = parseWidth(v);
+                                if(streetwidth == DEFAULT_WIDTH){
+                                streetwidth = parseWidth(v);}
                             }
                             if ("train".equals(k) && "yes".equals(v) || "tram".equals(k) && "yes".equals(v) || "railway".equals(k)) {
                                 rejectedWay = true;
+                            }
+                            if (k.equals("highway") && v.equals("traffic_signals") ||
+                                k.equals("highway") && v.equals("speed_camera") ||
+                                    k.equals("sidewalk:both")
+                            ){
+                                rejectedWay = true;
+                            }
+
+                            if (k.startsWith("sidewalk")) {
+                                // 1. Der Haupt-Tag: sidewalk=yes/no/both/left/right/separate
+                                if ("sidewalk".equals(k)) {
+                                    switch (v) {
+                                        case "both", "yes" -> {}
+                                        case "left" -> sideWalkRight = false;
+                                        case "right" -> sideWalkLeft = false;
+                                        case "no", "none","separate"    -> rejectedWay = true;
+                                    }
+                                }
+                                // 2. Spezifische Richtungs-Tags: sidewalk:left=yes/no/separate
+                                if ("sidewalk:left".equals(k) && "separate".equals(v)
+                                        || "sidewalk:right".equals(k) && "separate".equals(v) ||
+                                        "cycleway:left".equals(k) && "separate".equals(v)
+                                        || "cycleway:right".equals(k) && "separate".equals(v)) {
+                                    rejectedWay = true;
+                                }
+                                else if ("sidewalk:left".equals(k)) {
+                                    sideWalkRight = !"yes".equals(v); // "separate", "no", "none" setzen es auf false
+                                }
+                                else if ("sidewalk:right".equals(k)) {
+                                    sideWalkLeft = !"yes".equals(v);
+                                }
+                                else if ("sidewalk:both".equals(k)) {
+                                    boolean exists = "yes".equals(v);
+                                    sideWalkLeft = exists;
+                                    sideWalkRight = exists;
+                                }
+                            }
+                            if (k.equals("foot") && v.equals("designated") ||
+                                    k.equals("bicycle") && v.equals("designated") ||
+                                    k.equals("highway") && v.equals("footway") ||
+                                    k.equals("highway") && v.equals("path") ||
+                                    k.equals("highway") && v.equals("track") ||
+                                    k.equals("highway") && v.equals("pedestrian") ||
+                                    k.equals("highway") && v.equals("cycleway") ||
+                                    k.equals("highway") && v.equals("corridor") ||
+                                    k.equals("highway") && v.equals("bridleway") ||
+                                    k.equals("highway") && v.equals("steps") ||
+                                    k.equals("playground") && v.equals("track") ||
+                                    k.equals("leisure") && v.equals("barefoot")) {
+                                streetwidth = 0.0;
                             }
                         }
                     }
                 } else if (event == XMLStreamConstants.END_ELEMENT) {
                     String name = reader.getLocalName();
 
-                    if ("way".equals(name) && currentWayNodes.size() > 1 && !rejectedWay) {
+                    if ("way".equals(name) && currentWayNodes.size() > 1 && !rejectedWay && isStreet) {
                         for (int i = 0; i < currentWayNodes.size() - 1; i++) {
                             OsmNode fromNode = nodeCache.get(currentWayNodes.get(i));
                             OsmNode toNode = nodeCache.get(currentWayNodes.get(i + 1));
-                            builder.addEdge(new OsmEdge<>(fromNode, toNode, StreetCategory.STREET, streetwidth));
-                            builder.addEdge(new OsmEdge<>(toNode, fromNode, StreetCategory.STREET, streetwidth));
+                            builder.addEdge(new OsmEdge<>(fromNode, toNode, StreetCategory.STREET, streetwidth, sideWalkLeft, sideWalkRight));
+                            builder.addEdge(new OsmEdge<>(toNode, fromNode, StreetCategory.STREET, streetwidth, sideWalkRight, sideWalkLeft)); // Intentionally swapped Sidewalk parameters because mirrored edge
                         }
                     }
                 }

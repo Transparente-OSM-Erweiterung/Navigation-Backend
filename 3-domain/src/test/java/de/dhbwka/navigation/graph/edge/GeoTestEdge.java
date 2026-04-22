@@ -3,7 +3,7 @@ package de.dhbwka.navigation.graph.edge;
 import de.dhbwka.navigation.graph.node.GeoTestNode;
 import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategory;
 
-public class GeoTestEdge implements CategorizedGeoEdge<GeoTestNode, ExtensionEdgeCategory>, WidthedEdge<GeoTestNode> {
+public class GeoTestEdge implements CategorizedGeoEdge<GeoTestNode, ExtensionEdgeCategory>, WidthedEdge<GeoTestNode>, SideWalkClassified {
     final GeoTestNode origin;
     final GeoTestNode destination;
 
@@ -30,5 +30,15 @@ public class GeoTestEdge implements CategorizedGeoEdge<GeoTestNode, ExtensionEdg
     @Override
     public ExtensionEdgeCategory getCategory() {
         return ExtensionEdgeCategory.BASE_TO_BASE;
+    }
+
+    @Override
+    public boolean hasSideWalkLeft() {
+        return true;
+    }
+
+    @Override
+    public boolean hasSideWalkRight() {
+        return true;
     }
 }

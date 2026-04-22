@@ -1,12 +1,14 @@
 package de.dhbwka.navigation.osm;
 
 import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategory;
-import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
+import de.dhbwka.navigation.graph.edge.CategorizedWidthedSidewalkClassifiedGeoEdge;
+import de.dhbwka.navigation.graph.edge.SideWalkClassified;
 import de.dhbwka.navigation.graph.node.GeoNode;
 
 
 public class OsmEdge<NodeType extends GeoNode> implements
-        CategorizedWidthedGeoEdge<NodeType, ExtensionEdgeCategory>
+        CategorizedWidthedSidewalkClassifiedGeoEdge<NodeType, ExtensionEdgeCategory>,
+        SideWalkClassified
 {
 
     private final NodeType origin;
@@ -16,32 +18,23 @@ public class OsmEdge<NodeType extends GeoNode> implements
     private final StreetCategory streetCategory;
 
     private final double width;
+    private final boolean sideWalkLeft;
+    private final boolean sideWalkRight;
 
     public OsmEdge(
             NodeType origin,
             NodeType destination,
             StreetCategory streetCategory,
-            double width
+            double width,
+            boolean sideWalkLeft,
+            boolean sideWalkRight
     ) {
         this.origin = origin;
         this.destination = destination;
         this.streetCategory = streetCategory;
         this.width = width;
-    }
-
-    private static final StreetCategory STREET_CATEGORY_DEFAULT = StreetCategory.STREET;
-
-    public OsmEdge(
-            NodeType origin,
-            NodeType destination,
-            double width
-    ) {
-        this(
-                origin,
-                destination,
-                STREET_CATEGORY_DEFAULT,
-                width
-        );
+        this.sideWalkLeft = sideWalkLeft;
+        this.sideWalkRight = sideWalkRight;
     }
 
     @Override
@@ -66,5 +59,15 @@ public class OsmEdge<NodeType extends GeoNode> implements
     @Override
     public ExtensionEdgeCategory getCategory() {
         return ExtensionEdgeCategory.BASE_TO_BASE;
+    }
+
+    @Override
+    public boolean hasSideWalkLeft() {
+        return sideWalkLeft;
+    }
+
+    @Override
+    public boolean hasSideWalkRight() {
+        return sideWalkRight;
     }
 }

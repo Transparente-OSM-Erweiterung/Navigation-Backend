@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpServer;
 import de.dhbwka.navigation.extension.filter.ExtensionEdgeCategory;
 import de.dhbwka.navigation.graph.Graph;
 import de.dhbwka.navigation.graph.edge.CategorizedGeoEdge;
-import de.dhbwka.navigation.graph.edge.CategorizedWidthedGeoEdge;
+import de.dhbwka.navigation.graph.edge.CategorizedWidthedSidewalkClassifiedGeoEdge;
 import de.dhbwka.navigation.graph.node.GeoNode;
 import de.dhbwka.navigation.services.NavigationService;
 
@@ -23,7 +23,7 @@ public class NavigationServer {
 
     private final NavigationService service;
 
-    public NavigationServer(Graph<GeoNode, CategorizedWidthedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> graph) {
+    public NavigationServer(Graph<GeoNode, CategorizedWidthedSidewalkClassifiedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> graph) {
         this.service = new NavigationService(graph);
     }
 
@@ -55,7 +55,6 @@ public class NavigationServer {
         String[] parts = coords.replace("[", "").replace("]", "").split(",");
         String start = parts[0];
         String end = parts[1];
-
 
         List<CategorizedGeoEdge<? extends GeoNode, ExtensionEdgeCategory>> path = service.calculateRoute(start, end);
         String responseJson = String.format("""
