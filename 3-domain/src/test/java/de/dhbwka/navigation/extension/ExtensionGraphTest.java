@@ -128,4 +128,20 @@ class ExtensionGraphTest {
             .as("Calculated angle for node %s", id)
             .isEqualTo(expectedDeg);
     }
+
+    @ParameterizedTest(name = "Index {0} should map to id appender {1}")
+    @CsvSource({
+            "0, a",
+            "1, b",
+            "25, z",
+            "26, ba",
+            "27, bb",
+            "52, ca"
+    })
+    void indexAppenderShouldRoundTrip(int index, String appender) {
+        assertThat(ExtensionGraph.indexToIdAppender(index))
+                .isEqualTo(appender);
+        assertThat(ExtensionGraph.idAppenderToIndex(appender))
+                .isEqualTo(index);
+    }
 }

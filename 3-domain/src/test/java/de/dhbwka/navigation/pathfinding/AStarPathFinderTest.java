@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AStarPathFinderTest {
 
@@ -43,5 +44,29 @@ class AStarPathFinderTest {
                 .isNotEmpty()
                 .extracting(edge -> edge.getDestination().getId())
                 .containsExactly("B", "D");
+    }
+
+    @Test
+    void findPathShouldThrowWhenNoRouteExists() {
+        // Arrange
+        TestGraph<Vector2Node, Vector2Edge> graph = TestGraphBuilder.<Vector2Node, Vector2Edge>create()
+                .nodes(
+                        new Vector2Node("A", 0, 0),
+                        new Vector2Node("B", 1, 0),
+                        new Vector2Node("C", 2, 0)
+                )
+                .connect("A", "B", Vector2Edge::new)
+                .build();
+
+        AStarPathFinder<Vector2Node, Vector2Edge> pathFinder = new AStarPathFinder<>(
+                graph,
+                new EuclideanEdgeScorer<>(),
+                new EuclideanHeuristic<>()
+        );
+
+        // Act + Assert
+        assertThatThrownBy(() -> pathFinder.findPath("A", "C"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("No route found");
     }
 }
