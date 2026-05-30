@@ -49,6 +49,20 @@ void calcDegShouldReturnCorrectDegrees(String id, double x, double y, double exp
 **Analyse:** Mehrere repräsentative Fälle (alle Quadranten) werden systematisch getestet. Dadurch ist die Wahrscheinlichkeit hoch, dass Regressionsfehler in der Winkelberechnung erkannt werden.
 
 ### Negativ-Beispiel: Thorough
+```java
+@Test
+void projectUnprojectShouldRoundTrip() {
+    Vec2 reference = new Vec2(49.0, 8.4);
+    Vec2 global = new Vec2(49.0001, 8.4002);
+
+    Vec2 local = Projection.projectToLocal(global, reference);
+    Vec2 result = Projection.unprojectToGlobal(local, reference);
+
+    assertThat(result.x).isCloseTo(global.x, within(1e-9));
+    assertThat(result.y).isCloseTo(global.y, within(1e-9));
+}
+```
+**Analyse:** Der Test nutzt nur ein einziges Koordinatenpaar. Damit bleibt offen, wie die Projektion bei anderen Distanzen oder Richtungen reagiert. Für „Thorough“ wären mehrere Eingaben oder größere Offsets nötig.
 
 
 ## ATRIP: Professional
@@ -83,6 +97,27 @@ void getEdgesFromShouldFilterByPredicate() {
 **Analyse:** Klare Arrange/Act/Assert-Struktur, sprechender Testname und eindeutige Assertions machen den Test leicht verständlich und wartbar.
 
 ### Negativ-Beispiel: Professional
+```java
+@Test
+void shouldAllowEdgesByStartDestinationAndCategory() {
+    ExtensionEdgeCategoryPredicate<TestNode, TestEdge> predicate =
+            new ExtensionEdgeCategoryPredicate<>("start", "dest");
+
+    TestNode start = new TestNode("start");
+    TestNode dest = new TestNode("dest");
+    TestNode other = new TestNode("other");
+
+    assertThat(predicate.test(new TestEdge(start, other, ExtensionEdgeCategory.BASE_TO_BASE)))
+            .isTrue();
+    assertThat(predicate.test(new TestEdge(other, dest, ExtensionEdgeCategory.BASE_TO_BASE)))
+            .isTrue();
+    assertThat(predicate.test(new TestEdge(other, other, ExtensionEdgeCategory.EXTENSION_TO_EXTENSION_ALONG_STREET)))
+            .isTrue();
+    assertThat(predicate.test(new TestEdge(other, other, ExtensionEdgeCategory.BASE_TO_BASE)))
+            .isFalse();
+}
+```
+**Analyse:** Vier unterschiedliche Fälle werden in einem Test zusammengefasst. Das erschwert die Fehlersuche, weil nicht sofort klar ist, welcher Fall genau fehlschlägt. Professioneller wäre eine Parametrisierung oder getrennte Tests pro Fall.
 
 
 ## Code Coverage
