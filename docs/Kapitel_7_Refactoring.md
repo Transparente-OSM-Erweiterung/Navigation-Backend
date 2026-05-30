@@ -203,9 +203,68 @@ Rename Method ist ein Refactoring, bei dem der Name einer Methode geändert wird
 **UML-Vergleich:**
 Vorher:
 
+```mermaid
+classDiagram
+    direction BT
+
+    class Graph~Node, Edge~ {
+        <<Interface>>
+    }
+
+    class ExtensionGraph~InputNodeType, InputEdgeType~ {
+        - Graph~InputNodeType, InputEdgeType~ graph
+        + ExtensionGraph(graph: Graph)
+        + getNode(nodeId: String) Optional~GeoNode~
+        + getEdgesFrom(nodeId: String) Collection~CategorizedGeoEdge~
+        - getExtensionNode(nodeId: String) Optional~GeoNode~
+        - createExtensionNode(id: String, center: GeoNode, e1: WidthedEdge, e2: WidthedEdge) ExtensionNode
+        - getEdgesOfBaseNode(nodeId: String) Compound
+        - getEdgesOfExtensionNode(nodeId: String) Compound
+        - isExtensionId(id: String)$ boolean
+        + indexToIdAppender(index: int)$ String
+        + idAppenderToIndex(idAppender: String)$ int
+        + calcDeg(origin: E, dest: E, offset: double)$ double
+        + calcDeg(origin: E, dest: E)$ double
+    }
+
+    %% Beziehungen
+    ExtensionGraph ..|> Graph : implements
+    ExtensionGraph --> Graph : contains (graph)
+```
+
+
 ![](./img/Refactor1-UML1.png)
 
 Nachher:
+
+```mermaid
+classDiagram
+    direction BT
+
+    class Graph~Node, Edge~ {
+        <<Interface>>
+    }
+
+    class ExtensionGraph~InputNodeType, InputEdgeType~ {
+        - Graph~InputNodeType, InputEdgeType~ graph
+        + ExtensionGraph(graph: Graph)
+        + getNode(nodeId: String) Optional~GeoNode~
+        + getEdgesFrom(nodeId: String) Collection~CategorizedGeoEdge~
+        - getExtensionNode(nodeId: String) Optional~GeoNode~
+        - createExtensionNode(id: String, center: GeoNode, e1: WidthedEdge, e2: WidthedEdge) ExtensionNode
+        - getEdgesOfBaseNode(nodeId: String) Compound
+        - getEdgesOfExtensionNode(nodeId: String) Compound
+        - isExtensionId(id: String)$ boolean
+        + getIdSuffixfromIndex(index: int)$ String
+        + getIndexfromIdSuffix(idAppender: String)$ int
+        + calcDeg(origin: E, dest: E, offset: double)$ double
+        + calcDeg(origin: E, dest: E)$ double
+    }
+
+    %% Beziehungen
+    ExtensionGraph ..|> Graph : implements
+    ExtensionGraph --> Graph : contains (graph)
+```
 
 ![](./img/Refactor1-UML2.png)
 
@@ -224,8 +283,67 @@ Eine Metode auf die dies zutrifft, ist die Methode `createExtensionNode` in der 
 **UML-Vergleich:**
 Vorher:
 
+```mermaid
+classDiagram
+    direction BT
+
+    class Graph~Node, Edge~ {
+        <<Interface>>
+    }
+
+    class ExtensionGraph~InputNodeType, InputEdgeType~ {
+        - Graph~InputNodeType, InputEdgeType~ graph
+        + ExtensionGraph(graph: Graph)
+        + getNode(nodeId: String) Optional~GeoNode~
+        + getEdgesFrom(nodeId: String) Collection~CategorizedGeoEdge~
+        - getExtensionNode(nodeId: String) Optional~GeoNode~
+        - createExtensionNode(id: String, center: GeoNode, e1: WidthedEdge, e2: WidthedEdge) ExtensionNode
+        - getEdgesOfBaseNode(nodeId: String) Compound
+        - getEdgesOfExtensionNode(nodeId: String) Compound
+        - isExtensionId(id: String)$ boolean
+        + getIdSuffixfromIndex(index: int)$ String
+        + getIndexfromIdSuffix(idAppender: String)$ int
+        + calcDeg(origin: E, dest: E, offset: double)$ double
+        + calcDeg(origin: E, dest: E)$ double
+    }
+
+    %% Beziehungen
+    ExtensionGraph ..|> Graph : implements
+    ExtensionGraph --> Graph : contains (graph)
+```
+
 ![](./img/Refactor2-UML1.png)
 
 Nachher:
+
+```mermaid
+classDiagram
+    direction BT
+
+    class Graph~Node, Edge~ {
+        <<Interface>>
+    }
+
+    class ExtensionGraph~InputNodeType, InputEdgeType~ {
+        - Graph~InputNodeType, InputEdgeType~ graph
+        + ExtensionGraph(graph: Graph)
+        + getNode(nodeId: String) Optional~GeoNode~
+        + getEdgesFrom(nodeId: String) Collection~CategorizedGeoEdge~
+        - getExtensionNode(nodeId: String) Optional~GeoNode~
+        - createExtensionNode(id: String, center: GeoNode, e1: WidthedEdge, e2: WidthedEdge) ExtensionNode
+        - getEdgesOfBaseNode(nodeId: String) Compound
+        - getEdgesOfExtensionNode(nodeId: String) Compound
+        - isExtensionId(id: String)$ boolean
+        + getIdSuffixfromIndex(index: int)$ String
+        + getIndexfromIdSuffix(idAppender: String)$ int
+        + calcDeg(origin: E, dest: E, offset: double)$ double
+        + calcDeg(origin: E, dest: E)$ double
+        + calculateIntersection(Vec2 p1, Vec2 u1, Vec2 p2, Vec2 u2)$ Vec2
+    }
+
+    %% Beziehungen
+    ExtensionGraph ..|> Graph : implements
+    ExtensionGraph --> Graph : contains (graph)
+```
 
 ![](./img/Refactor2-UML2.png)
