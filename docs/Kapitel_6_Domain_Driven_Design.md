@@ -1,7 +1,7 @@
 # Kapitel 6: Domain Driven Design
 
 ## Ubiquitous Language
-[4 Beispiele für die Ubiquitous Language; jeweils Bezeichnung, Bedeutung und kurze Begründung, warum es zur Ubiquitous Language gehört]
+<!--[4 Beispiele für die Ubiquitous Language; jeweils Bezeichnung, Bedeutung und kurze Begründung, warum es zur Ubiquitous Language gehört]-->
 
 | Bezeichnung                | Bedeutung                                                                                                           | Begründung                                                                                                                                                                                                                                                                                                                                      |
 |:---------------------------|:--------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -11,7 +11,7 @@
 | 4. Extension Edge Category | Eine Klassifizierung der Extension Edge, bezüglich der Arten an Knoten, welche die Kante verbindet                  | Die Klassifizierung der Kanten bildet die Basis für Regeln welche basierend auf der Kanten Klassifizierung Fehlerbehebungen im erweiterten Graphen durchführen. Die Definition des Begriffs erlaubt eine präzise Ausdrucksweise – sowohl im Gespräch als auch in der Logik im Produktiv-Code und in Tests.                                      |
 
 ## Entities
-[UML, Beschreibung und Begründung des Einsatzes einer Entity; falls keine Entity vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]
+<!--[UML, Beschreibung und Begründung des Einsatzes einer Entity; falls keine Entity vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]-->
 
 Eine Entity zeichnet sich im Domain-Driven Design dadurch aus, dass sie eine eindeutige, über die Zeit und Zustände hinweg stabile Identität besitzt.
 Ihre Identifizierbarkeit basiert nicht auf der Gleichheit ihrer Attribute, sondern auf einem permanenten Identifikationsmerkmal.
@@ -27,7 +27,7 @@ Der Routing-Algorithmus `AStarPathFinder` stützt sich maßgeblich auf diese ID-
 ![](./img/Entities.png)
 
 ## Value Objects
-[UML, Beschreibung und Begründung des Einsatzes eines Value Objects; falls kein Value Object vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]
+<!--[UML, Beschreibung und Begründung des Einsatzes eines Value Objects; falls kein Value Object vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]-->
 
 in Value Object besitzt im DDD-Kontext keine eigene konzeptionelle Identität.
 Es wird ausschließlich durch die Gesamtheit seiner Attribute definiert.
@@ -48,7 +48,7 @@ Die erzwungene Unveränderlichkeit schützt die Kernlogik vor schwer auffindbare
 ![](./img/Value-Objects.png)
 
 ## Repositories
-[UML, Beschreibung und Begründung des Einsatzes eines Repositories; falls kein Repository vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]
+<!--[UML, Beschreibung und Begründung des Einsatzes eines Repositories; falls kein Repository vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]-->
 
 Ein klassisches DDD-Repository dient dazu, den Zugriff auf persistente Speicherstrukturen, wie etwa relationale Datenbanken zu kapseln.
 Es vermittelt der Domänenschicht die Illusion einer einfachen In-Memory-Kollektion von Aggregaten und stellt Methoden für die CRUD-Operationen bereit.
@@ -60,7 +60,7 @@ Im vorliegenden Navigationssystem existiert kein dediziertes Repository-Muster n
 Die Einführung eines zusätzlichen Repositories, welches das `Graph`-Interface lediglich umschließen würde, würde zu unnötiger Komplexität führen, da die Funktionalität des Datenabrufs bereits vollständig und sauber durch die Graphen-Abstraktion abgedeckt ist.
 
 ## Aggregates
-[UML, Beschreibung und Begründung des Einsatzes eines Aggregates; falls kein Aggregate vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]
+<!--[UML, Beschreibung und Begründung des Einsatzes eines Aggregates; falls kein Aggregate vorhanden: ausführliche Begründung, warum es keines geben kann/hier nicht sinnvoll ist]-->
 
 Ein Aggregate fasst eine Menge von Entitäten und Wertobjekten zusammen, die als logische Einheit für Datenänderungen betrachtet werden.
 Es definiert eine strikte Konsistenzgrenze, innerhalb derer geschäftliche Invarianten unter der Kontrolle einer führenden Wurzelentität (Aggregate Root) erzwungen werden.
