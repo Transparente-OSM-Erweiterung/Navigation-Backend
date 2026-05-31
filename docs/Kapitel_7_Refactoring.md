@@ -200,6 +200,8 @@ Dadurch wird die Hauptmethode `getNeighborsOfBaseNode` übersichtlicher und leic
 
 Rename Method ist ein Refactoring, bei dem der Name einer Methode geändert wird, damit ihre Funktionen leichter zu verstehen sind. Eine Methode mit einem unklaren oder irreführenden Namen kann die Lesbarkeit und Wartbarkeit des Codes beeinträchtigen. In diesem Projekt gibt es die Methoden `indexToIdAppender` und `idAppenderToIndex`, die den Postfix eines Erweiterungsknotens zurückgibt. Der Name `indexToIdAppender` ist jedoch nicht sehr aussagekräftig und könnte verbessert werden, um die Funktion der Methoden klarer zu machen. Ein besserer Name könnten `getIdSuffixfromIndex` und `getIndexfromIdSuffix` sein, da es diese deutlicher machen, was in der Methode passiert. Durch die Umbenennung der Methoden wird der Code leichter verständlich und die Absicht der Methoden wird klarer kommuniziert.
 
+**Commit:** [9786b43e4175662ba5714761c329b85dd8cee7e9]
+
 **UML-Vergleich:**
 Vorher:
 
@@ -278,7 +280,7 @@ Beim "Extract Method" Refactoring wird ein Codefragment aus einer bestehenden Me
 **Begründung:**  
 Eine Metode auf die dies zutrifft, ist die Methode `createExtensionNode` in der Klasse `ExtensionGraph`. Hier kann durch das Extrahieren der Schnittpunktsberechnung in `calculateIntersection` die Hauptmethode auf ihre koordinierende Aufgabe reduziert werden, und kann nun leichter verstanden werden.
 
-**Commit:** [Commit-Hash]
+**Commit:** [ffdedca6dd6a8a40e1c7ce2a4450873778a70e1f]
 
 **UML-Vergleich:**
 Vorher:
