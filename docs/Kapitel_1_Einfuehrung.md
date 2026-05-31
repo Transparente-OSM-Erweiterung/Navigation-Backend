@@ -47,7 +47,7 @@ Die Navigation wird über eine REST-API-Schnittstelle bereitgestellt, die Anfrag
 
 * **`coords`**: Ein String-Parameter, der die IDs des Start- und Zielknotens enthält.
 * **Format:** `[StartID,EndID]`
-* **Beispiel:** `?coords=[21533398,154916677]`
+* **Beispiel:** `?coords=[25642389,16718565]`
 * *Hinweis:* Die IDs müssen als String-Werte interpretiert werden, die den Knoten-IDs in der `map.osm` entsprechen. Es handelt sich dabei um OSM-Knoten IDs. Da die in der Moodle Abgabe mitgeliferte `map.osm` Datei ein Kartensegment von Region Karlsruhe ist, können jegliche Straßenknoten-IDs innerhalb Karlsruhe aus dem OSM-Viewer (z. B. auf openstreetmap.org) zur testweisen Ausführung verwendet werden. Unten steht eine Liste an Beispielknoten bereit, die verwendet werden können.
 
 ##### Test-Knoten-IDs
