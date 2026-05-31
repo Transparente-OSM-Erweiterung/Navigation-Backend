@@ -28,3 +28,9 @@ subprojects {
         useJUnitPlatform()
     }
 }
+
+tasks.register('run') {
+    dependsOn ':0-plugin:run'
+    group = 'application'
+    description = 'Startet die Navigations-Anwendung aus dem Subprojekt 0-plugin.'
+}

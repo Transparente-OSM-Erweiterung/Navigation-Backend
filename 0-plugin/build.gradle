@@ -5,3 +5,15 @@ plugins {
 dependencies {
     api project(":1-adapters")
 }
+
+project(':0-plugin') {
+    apply plugin: 'application'
+
+    application {
+        mainClass = 'de.dhbwka.navigation.Main'
+    }
+
+    run {
+        workingDir = rootProject.projectDir
+    }
+}
