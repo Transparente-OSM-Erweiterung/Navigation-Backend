@@ -19,7 +19,7 @@ Um die Applikation zu starten, müssen folgende Voraussetzungen erfüllt sein:
 ### Voraussetzungen
 *   **Java:** Es muss ein Java Development Kit (JDK) in der Version **21** installiert sein.
 *   **Gradle:** Das Projekt verwendet Gradle als Build-Tool. Die benötigte Gradle-Version ist **8.14**. Dank des mitgelieferten Gradle-Wrappers (`gradlew`) muss Gradle nicht separat installiert sein.
-*   **OSM-Daten:** Im Verzeichnis `run/` muss eine Datei namens `map.osm` vorhanden sein.
+*   **OSM-Daten:** Im Verzeichnis `run/` muss die Datei namens `map.osm` vorhanden sein.
     *   *Zweck der Datei:* Diese Datei enthält die Rohdaten des Graphen (Knoten und Kanten) im XML-Format von OpenStreetMap. Sie dient als Grundlage für den Import und die anschließende Erweiterung des Graphen.
 
 ### Schritt-für-Schritt-Anleitung
@@ -34,18 +34,50 @@ Um die Applikation zu starten, müssen folgende Voraussetzungen erfüllt sein:
     ./gradlew run
     ```
     Der Server startet standardmäßig auf `http://localhost:8080`. Die Navigation kann über den Endpunkt `/nav?coords=[StartID,EndID]` aufgerufen werden.
+#### Detaillierte Informationen zum Navigations-Endpunkt
+
+Die Navigation wird über eine REST-API-Schnittstelle bereitgestellt, die Anfragen via `GET` entgegennimmt.
+
+##### Endpunkt: `/nav`
+
+* **Methode:** `GET`
+* **Beschreibung:** Berechnet den optimalen Pfad zwischen zwei Knoten innerhalb des erweiterten Graphen.
+
+##### Parameter
+
+* **`coords`**: Ein String-Parameter, der die IDs des Start- und Zielknotens enthält.
+* **Format:** `[StartID,EndID]`
+* **Beispiel:** `?coords=[21533398,154916677]`
+* *Hinweis:* Die IDs müssen als String-Werte interpretiert werden, die den Knoten-IDs in der `map.osm` entsprechen. Es handelt sich dabei um OSM-Knoten IDs. Da die in der Moodle Abgabe mitgeliferte `map.osm` Datei ein Kartensegment von Region Karlsruhe ist, können jegliche Straßenknoten-IDs innerhalb Karlsruhe aus dem OSM-Viewer (z. B. auf openstreetmap.org) zur testweisen Ausführung verwendet werden. Unten steht eine Liste an Beispielknoten bereit, die verwendet werden können.
+
+##### Test-Knoten-IDs
+
+Für erste Funktionstests, die sicherstellen, dass das Routing grundsätzlich funktioniert, eignen sich folgende ID-Kombinationen aus dem bereitgestellten Karlsruhe-Datensatz besonders gut:
+
+| Start-ID      | Ziel-ID      |
+|---------------|--------------|
+| `25642389`    | `16718565`   |
+| `15232424`    | `1886083872` |
+| `15232424`    | `1722820055` |
+| `1072734523`  | `34982432`   |
+| `1832108909`  | `25278272`   |
+| `10554554101` | `3746053829` |
+| `1708378647`  | `21031223`   |
+| `6561666311`  | `1725507001` |
+
+##### Erwarteter Output
+
+Der Server liefert eine Antwort im **JSON-Format**. Es handelt sich um ein Array von Koordinaten-Paaren, die den Pfad vom Start zum Ziel beschreiben.
+
+* **Struktur:** `[[longitude1, latitude1], [longitude2, latitude2], ...]`
+* **Beispiel:** `[[8.40029, 49.00403], [8.40050, 49.00410], ...]`
 
 ## Wie testet man die Applikation?
 Die Applikation verfügt über eine Testsuite, die verschiedene Aspekte der Funktionalität abdeckt.
 
 ### Testarten und Umfang
 *   **Unit Tests:** Diese testen einzelne Komponenten isoliert. Beispielsweise werden mathematische Berechnungen (Winkelberechnungen, Gleichungssysteme via `Cramer2Solve`) und grundlegende Graph-Operationen validiert.
-*   **Integrationstests:** Diese prüfen das Zusammenspiel mehrerer Komponenten, insbesondere die korrekte Erzeugung des `ExtensionGraph` und die Pfadfindung mittels `AStarPathFinder` auf dem erweiterten Graphen.
-*   **Geplante Bruno-Tests (API-Tests):** Zukünftig sollen API-Tests mittels Bruno implementiert werden.
-    *   *Art:* Dies sind automatisierte Blackbox-Tests für die REST-Schnittstelle.
-    *   *Was wird getestet:* Es wird geprüft, ob der Server auf Anfragen korrekt reagiert, gültiges JSON zurückgibt und ob die berechneten Pfade plausibel sind.
-    *   *Voraussetzung:* Installierter Bruno-Client oder CLI (`bru`).
-    *   *Ausführung:* Über die Bruno-GUI oder den CLI-Runner.
+*   **Integrationstests:** Die HTTP-Schnittstelle wurde durch manuelles Testen abgesichert. 
 
 ### Frameworks und Voraussetzungen
 *   **JUnit 5 (Jupiter):** Wird als primäres Test-Framework verwendet.
