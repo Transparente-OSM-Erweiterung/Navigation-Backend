@@ -9,7 +9,7 @@ Die *Dependency Rule* besagt, dass Abhängigkeiten im Quellcode nur von außen n
 ### Positiv-Beispiel 1: Dependency Rule
 Ein positives Beispiel für die Einhaltung der Dependency Rule findet sich im Zusammenspiel zwischen dem Modul `2-application` und `3-domain`.
 
-*   **Klasse:** `de.dhbwka.navigation.AStarPathFinder` (Schicht: Application)
+*   **Klasse:** `de.dhbwka.navigation.pathfinding.AStarPathFinder` (Schicht: Application)
 *   **Abhängigkeit:** Die Klasse `AStarPathFinder` implementiert das Interface `PathFinder` aus der Domain-Schicht (`3-domain`).
 *   **Analyse:**
     *   **Abhängigkeit nach innen:** `AStarPathFinder` (äußere Schicht) kennt und nutzt `PathFinder` sowie `Node` (innere Schicht). Dies entspricht der Regel.
@@ -30,7 +30,7 @@ Aus diesem Grund wird nachfolgend ein zweites Positiv-Beispiel aufgeführt.
 ## Analyse der Schichten
 
 ### Schicht: Domain (Entities / Core)
-*   **Klasse:** `de.dhbwka.navigation.GeoNode`
+*   **Klasse:** `de.dhbwka.navigation.graph.node.GeoNode`
 *   **Aufgabe:** Definiert die grundlegenden Eigenschaften eines geografischen Knotens (Breitengrad, Längengrad) im Navigationssystem.
 *   **Einordnung & Begründung:** Diese Klasse (bzw. dieses Interface) gehört zur Domain-Schicht (entspricht dem `3-domain` Modul). Sie kapselt eine fundamentale betriebliche Enterprise-Regel: Was macht einen Ort in unserem System aus? Sie ist völlig unabhängig von der Art der Datenspeicherung oder dem verwendeten Algorithmus.
 *   **UML:**
@@ -40,7 +40,7 @@ Aus diesem Grund wird nachfolgend ein zweites Positiv-Beispiel aufgeführt.
     * Die Methode `toVec2` überführt die Koordinate des repräsentierten Knoten in die Darstellungsweise eines Vektors, welcher für mathematische Operationen auf der Position eines Knotens verwendet wird.
 
 ### Schicht: Application (Use Cases)
-*   **Klasse:** `de.dhbwka.navigation.ExtensionGraph`
+*   **Klasse:** `de.dhbwka.navigation.extension.ExtensionGraph`
 *   **Aufgabe:** Implementiert die Logik für die "Transparente Erweiterung" des Graphen. Sie berechnet die Zusatzknoten und deren Nachbarschaftsbeziehungen basierend auf einem Basis-Graphen.
 *   **Einordnung & Begründung:** `ExtensionGraph` gehört zur Application-Schicht (`2-application`). Sie arbeitet dabei als eine Verarbeitungsschicht von Daten. Dabei erwartete sie von der darüberliegenden schicht, einem `Graph` über die Schnittstellenmethode `getNeighbours` und `getNode` Daten eines Basisgraphs, verarbeitet diese Daten zur Dualgraph-Erweiterung. Und gibt Daten über die `getNeighbours` und `getNode` Methode an die nächste angrenzende Schicht weiter. Datenhaltung ist nicht die Aufgabe dieser Klasse. Mit dieser zentralen Rolle in der Datenverarbeitung der Applikation lässt sich erklären, dass die Klasse ein Bestandteil der Application-Schicht ist.
 * Die einzige Verantwortlichkeit dieser Klasse ist das Ermitteln von Nachbarschaften im erweiterten Graphen.

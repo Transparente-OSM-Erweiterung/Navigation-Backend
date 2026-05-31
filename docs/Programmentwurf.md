@@ -1,9 +1,12 @@
 # Programmentwurf
-[Bezeichnung]
 
-Name: [Name, Vorname]  
-Matrikelnummer: [MNR]  
-Abgabedatum: [DATUM]
+Name:  
+
+Matrikelnummer: 
+
+Abgabedatum: 31.05.2026
+
+(zur Anonaymität auf Github werden diese Angaben an dieser Stelle nicht getätigt. Die Angaben sind in der Moodle Abgabe zu finden. )
 
 ## Inhaltsverzeichnis
 1. [Einführung](Kapitel_1_Einfuehrung.md)
