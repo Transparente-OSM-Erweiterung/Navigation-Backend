@@ -69,27 +69,27 @@ public class ExtensionGraph<InputNodeType extends GeoNode, InputEdgeType extends
         Vec2 p1 = localOrigin.add(u1.rot90right().scale(0.5 * w1));
         Vec2 p2 = localOrigin.add(u2.rot90left().scale(0.5 * w2));
 
-        // Cramer's Rule for 2x2 Matrices
-
-        // g: point1 + u1 * s
-        // f: point2 + u2 * t
-
-        // (u1.x, -u2.x) * (s) = (p2.x - p1.x)
-        // (u1.y, -u2.y) (t) (p2.y - p1.y)
-        Mat2 mat = new Mat2(u1.x, -u2.x, u1.y, -u2.y);
-        Vec2 rhs = p2.add(p1.negated());
-
-        Vec2 intersection;
-        try {
-            double s = Cramer2Solve.solveX(mat, rhs);
-            intersection = p1.add(u1.scale(s));
-        } catch (IllegalArgumentException e) {
-            // Fallback for parallel lines
-            intersection = p1.add(p2).scale(0.5);
-        }
+        // Schnittpunktberechnung in eine eigene Methode ausgelagert
+        Vec2 intersection = calculateIntersection(p1, u1, p2, u2);
 
         Vec2 global = Projection.unprojectToGlobal(intersection, ref);
         return new ExtensionNode(id, global.x, global.y);
+    }
+
+    private Vec2 calculateIntersection(Vec2 p1, Vec2 u1, Vec2 p2, Vec2 u2) {
+        // Cramer's Rule for 2x2 Matrices
+        // (u1.x, -u2.x) * (s) = (p2.x - p1.x)
+        // (u1.y, -u2.y) (t) = (p2.y - p1.y)
+        Mat2 mat = new Mat2(u1.x, -u2.x, u1.y, -u2.y);
+        Vec2 rhs = p2.add(p1.negated());
+
+        try {
+            double s = Cramer2Solve.solveX(mat, rhs);
+            return p1.add(u1.scale(s));
+        } catch (IllegalArgumentException e) {
+            // Fallback for parallel lines
+            return p1.add(p2).scale(0.5);
+        }
     }
 
     @Override
